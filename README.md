@@ -24,11 +24,11 @@
 ## Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-repo/colorhunt-clone.git
+   git clone https://github.com/MQHANAD/Lawwen.git
    ```
 2. Navigate to the project directory:
    ```bash
-   cd colorhunt-clone
+   cd Lawwen
    ```
 3. Install dependencies:
    ```bash
