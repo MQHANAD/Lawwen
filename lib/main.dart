@@ -32,20 +32,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     {
       'image': 'assets/images/logoGif.gif',
       'title': 'Unleash Your Creativity',
-      'subtitle': 'Explore handpicked color palettes and create your own masterpiece.',
+      'subtitle':
+          'Explore handpicked color palettes and create your own masterpiece.',
       'height': "400",
+      'bottom': "330",
     },
     {
       'image': 'assets/images/CUi.png',
       'title': 'Personalize Your Experience',
       'subtitle': 'Create Your Own Color Palettes.\n',
-      'height': "400",
+      'height': "700",
+      'bottom': "160",
     },
     {
       'image': 'assets/images/UI.png',
       'title': 'Get Started',
       'subtitle': 'Join Us In Lawwen And Let Your Creativity Flow!\n',
-      'height': "400",
+      'height': "700",
+      'bottom': "160",
     },
   ];
 
@@ -81,6 +85,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     required String imageUrl,
     required double height,
     required int index,
+    required double bottom,
   }) {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -88,7 +93,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         return Stack(
           children: [
             Positioned(
-              bottom: screenHeight * 0.38 + 5,
+              bottom: bottom,
               left: 10,
               right: 10,
               child: Padding(
@@ -101,8 +106,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               left: 0,
               right: 0,
               height: screenHeight * 0.4,
-              child: Container(
-                decoration: BoxDecoration(color: Color(0xFFF9FCFF)),
+              child: Opacity(
+                opacity: 0.97,
+                child: Container(
+                  decoration: BoxDecoration(color: Color(0xFFFFFFFF)),
+                ),
               ),
             ),
           ],
@@ -125,6 +133,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 imageUrl: _onboardingData[index]['image']!,
                 height: double.parse(_onboardingData[index]['height']!),
                 index: index,
+                bottom: double.parse(_onboardingData[index]['bottom']!),
               );
             },
           ),
@@ -141,7 +150,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   Text(
                     _onboardingData[_currentPage]['title']!,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 6),
                   Text(
@@ -156,19 +166,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           // "Get Started" button on the final page.
           if (_currentPage == _onboardingData.length - 1)
             Positioned(
-              bottom: 100,
+              bottom: 120,
               left: 24,
               right: 24,
               child: ElevatedButton(
                 onPressed: _nextPage,
                 style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50),
+                  minimumSize: const Size(double.infinity, 60),
                   backgroundColor: const Color(0xFFB1B2FF),
                   foregroundColor: Colors.white,
                   elevation: 8,
                   shadowColor: Colors.grey.withOpacity(0.5),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                  textStyle: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 child: const Text('Get Started'),
               ),
@@ -182,7 +194,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(
                 _onboardingData.length,
-                    (index) => _buildIndicator(index),
+                (index) => _buildIndicator(index),
               ),
             ),
           ),
@@ -206,5 +218,3 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 }
-
-
