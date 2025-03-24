@@ -35,7 +35,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       'subtitle':
           'Explore handpicked color palettes and create your own masterpiece.',
       'height': "400",
-      'bottom': "330",
+      'bottom': "310",
     },
     {
       'image': 'assets/images/CUi.png',
