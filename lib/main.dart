@@ -36,10 +36,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   // Example onboarding data: image asset + title + subtitle + image height.
   final List<Map<String, String>> _onboardingData = [
     {
-      'image': 'assets/images/logo.png',
-      'title': 'Welcome to Lawwen',
-      'subtitle': 'Swipe to discover more.',
-      'height': "200",
+      'image': 'assets/images/logoGif.gif',
+      'title': 'Unleash Your Creativity',
+      'subtitle': 'Explore handpicked color palettes and create your own masterpiece.',
+      'height': "400",
     },
     {
       'image': 'assets/images/CUi.png',
