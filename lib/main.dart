@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'Login.dart';
+const Color mainColor = Color(0xFFB1B2FF);
 void main() {
   runApp(const MyApp());
 }
@@ -33,7 +34,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       'image': 'assets/images/logoGif.gif',
       'title': 'Unleash Your Creativity',
       'subtitle':
-          'Explore handpicked color palettes and create your own masterpiece.',
+      'Explore handpicked color palettes and create your own masterpiece.',
       'height': "400",
       'bottom': "310",
     },
@@ -63,6 +64,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     // TODO: Navigate to your main/home screen.
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Onboarding finished!')),
+    );
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginPage()),
     );
   }
 
@@ -194,7 +197,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(
                 _onboardingData.length,
-                (index) => _buildIndicator(index),
+                    (index) => _buildIndicator(index),
               ),
             ),
           ),
