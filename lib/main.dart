@@ -61,10 +61,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _nextPage() {
-    // TODO: Navigate to your main/home screen.
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Onboarding finished!')),
-    );
     Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginPage()),
     );
   }
