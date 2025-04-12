@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'Home.dart';
 import 'Login.dart';
+import 'Verification.dart';
+import 'email_screen.dart';
 const Color mainColor = Color(0xFFB1B2FF);
 void main() {
   runApp(const MyApp());
@@ -61,7 +64,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _nextPage() {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginPage()),
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const EmailScreen()),
     );
   }
 

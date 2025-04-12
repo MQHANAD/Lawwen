@@ -196,7 +196,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 10),
               child: Center(
-                child: Image.asset('assets/images/otherLogo.png', height: 40),
+                child: Image.asset('assets/images/logo.png', height: 40),
               ),
             ),
             // Sort and Filter

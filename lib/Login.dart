@@ -15,11 +15,12 @@ class _LoginPageState extends State<LoginPage> {
       Scaffold(
 
         body: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Image.asset('assets/images/otherLogo.png',
-              height: 200,
+            const SizedBox(height: 140),
+            Image.asset('assets/images/logo.png',
+              height: 160,
             ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 30),
@@ -60,7 +61,7 @@ class _LoginPageState extends State<LoginPage> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 15),
                     child: TextFormField(
-                      keyboardType: TextInputType.emailAddress,
+                      keyboardType: TextInputType.visiblePassword,
                       decoration: InputDecoration(
                         hintText: 'password',
                         filled: true,
