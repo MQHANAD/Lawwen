@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import '../main.dart'; // to use mainColor
+import '../main.dart'; // for mainColor
 
-// Step 1: Create a PaletteModel
+// Palette Model
 class PaletteModel {
   final String id;
   final List<String> colorHexCodes;
   final int likes;
-  final String createdAt; // You can parse it to DateTime later if needed
+  final DateTime createdAt; // using DateTime!
 
   PaletteModel({
     required this.id,
@@ -16,47 +16,175 @@ class PaletteModel {
   });
 }
 
-// Step 2: HomeScreen
-class HomeScreen extends StatelessWidget {
-  // Example palettes (later you fetch from database)
-  final List<PaletteModel> palettes = [
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({Key? key}) : super(key: key);
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  // Full list of palettes
+  final List<PaletteModel> allPalettes = [
     PaletteModel(
       id: "1",
       colorHexCodes: ["c5c9ff", "d2d7ff", "e0e4ff"],
       likes: 2,
-      createdAt: "2 hours",
+      createdAt: DateTime.now().subtract(const Duration(hours: 2)),
     ),
     PaletteModel(
       id: "2",
       colorHexCodes: ["212529", "495057", "0dcaf0"],
-      likes: 1,
-      createdAt: "3 hours",
+      likes: 10,
+      createdAt: DateTime.now().subtract(const Duration(days: 1)),
     ),
     PaletteModel(
       id: "3",
       colorHexCodes: ["f8c8dc", "fdfd96", "9bf6ff"],
       likes: 5,
-      createdAt: "5 hours",
+      createdAt: DateTime.now().subtract(const Duration(hours: 5)),
     ),
     PaletteModel(
       id: "4",
       colorHexCodes: ["c92a2a", "fa5252", "ffd6a5"],
       likes: 15,
-      createdAt: "10 hours",
+      createdAt: DateTime.now().subtract(const Duration(hours: 10)),
     ),
     PaletteModel(
       id: "5",
       colorHexCodes: ["f9ca24", "40739e", "273c75"],
       likes: 8,
-      createdAt: "12 hours",
+      createdAt: DateTime.now().subtract(const Duration(days: 5)),
     ),
     PaletteModel(
       id: "6",
       colorHexCodes: ["00cec9", "2d3436", "ff7675"],
-      likes: 7,
-      createdAt: "1 day",
+      likes: 3,
+      createdAt: DateTime.now().subtract(const Duration(days: 7)),
     ),
   ];
+
+  List<PaletteModel> displayedPalettes = [];
+
+  @override
+  void initState() {
+    super.initState();
+    displayedPalettes = List.from(allPalettes);
+  }
+
+  // Sort functions
+  void sortByNewest() {
+    setState(() {
+      displayedPalettes.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    });
+  }
+
+  void sortByLikes() {
+    setState(() {
+      displayedPalettes.sort((a, b) => b.likes.compareTo(a.likes));
+    });
+  }
+
+  // Customizable filter logic
+  void showCustomizableFilterSheet() {
+    int minLikes = 0;
+    DateTime? selectedDate;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+          left: 16,
+          right: 16,
+          top: 24,
+        ),
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setSheetState) {
+            return SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Likes Input
+                  TextField(
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'Minimum Likes',
+                      border: OutlineInputBorder(),
+                    ),
+                    onChanged: (value) {
+                      setSheetState(() {
+                        minLikes = int.tryParse(value) ?? 0;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  // Date Picker
+                  ElevatedButton(
+                    onPressed: () async {
+                      DateTime? picked = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now().subtract(const Duration(days: 7)),
+                        firstDate: DateTime(2020),
+                        lastDate: DateTime.now(),
+                      );
+                      if (picked != null) {
+                        setSheetState(() {
+                          selectedDate = picked;
+                        });
+                      }
+                    },
+                    child: Text(selectedDate == null
+                        ? 'Pick Created After Date'
+                        : 'Picked: ${selectedDate!.toLocal().toString().split(' ')[0]}'),
+                  ),
+                  const SizedBox(height: 20),
+                  // Apply Button
+                  ElevatedButton(
+                    onPressed: () {
+                      applyCustomFilters(minLikes, selectedDate);
+                      Navigator.pop(context);
+                    },
+                    child: const Text('Apply Filters'),
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  void applyCustomFilters(int minLikes, DateTime? createdAfter) {
+    setState(() {
+      displayedPalettes = allPalettes.where((p) {
+        bool likesOk = p.likes >= minLikes;
+        bool dateOk = createdAfter == null || p.createdAt.isAfter(createdAfter);
+        return likesOk && dateOk;
+      }).toList();
+    });
+  }
+
+  void resetFilters() {
+    setState(() {
+      displayedPalettes = List.from(allPalettes);
+    });
+  }
+
+  // Helper to format "x hours ago"
+  String timeAgo(DateTime date) {
+    final Duration diff = DateTime.now().difference(date);
+    if (diff.inMinutes < 60) {
+      return '${diff.inMinutes}m ago';
+    } else if (diff.inHours < 24) {
+      return '${diff.inHours}h ago';
+    } else {
+      return '${diff.inDays}d ago';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +192,7 @@ class HomeScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // Top Centered Logo
+            // Logo
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 10),
               child: Center(
@@ -77,31 +205,37 @@ class HomeScreen extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    children: const [
-                      Icon(Icons.sort, size: 28),
-                      SizedBox(height: 4),
-                      Text('Sort', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                      Text('Sorted by most recent', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                    ],
+                  GestureDetector(
+                    onTap: () => showSortOptions(),
+                    child: Column(
+                      children: const [
+                        Icon(Icons.sort, size: 28),
+                        SizedBox(height: 4),
+                        Text('Sort', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                        Text('Sorted by', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                      ],
+                    ),
                   ),
-                  Column(
-                    children: const [
-                      Icon(Icons.filter_alt, size: 28),
-                      SizedBox(height: 4),
-                      Text('Filters', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                      Text('1 filter applied', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                    ],
+                  GestureDetector(
+                    onTap: () => showCustomizableFilterSheet(),
+                    child: Column(
+                      children: const [
+                        Icon(Icons.filter_alt, size: 28),
+                        SizedBox(height: 4),
+                        Text('Filters', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                        Text('Custom', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
-            // Palettes Grid
+            // Palette Grid
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: GridView.builder(
-                  itemCount: palettes.length,
+                  itemCount: displayedPalettes.length,
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     mainAxisSpacing: 16,
@@ -109,7 +243,10 @@ class HomeScreen extends StatelessWidget {
                     childAspectRatio: 0.7,
                   ),
                   itemBuilder: (context, index) {
-                    return PaletteCard(palette: palettes[index]);
+                    return PaletteCard(
+                      palette: displayedPalettes[index],
+                      timeAgoText: timeAgo(displayedPalettes[index].createdAt),
+                    );
                   },
                 ),
               ),
@@ -117,8 +254,6 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
       ),
-
-      // Bottom Navigation Bar
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         selectedItemColor: mainColor,
@@ -134,18 +269,54 @@ class HomeScreen extends StatelessWidget {
         ],
         currentIndex: 0,
         onTap: (index) {
-          // Handle navigation here
+          // Handle navigation
         },
+      ),
+    );
+  }
+
+  void showSortOptions() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.access_time),
+            title: const Text('Sort by Newest'),
+            onTap: () {
+              sortByNewest();
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.favorite),
+            title: const Text('Sort by Most Liked'),
+            onTap: () {
+              sortByLikes();
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.clear),
+            title: const Text('Clear Sort/Filter'),
+            onTap: () {
+              resetFilters();
+              Navigator.pop(context);
+            },
+          ),
+        ],
       ),
     );
   }
 }
 
-// Step 3: PaletteCard updated
+// PaletteCard
 class PaletteCard extends StatelessWidget {
   final PaletteModel palette;
+  final String timeAgoText;
 
-  const PaletteCard({Key? key, required this.palette}) : super(key: key);
+  const PaletteCard({Key? key, required this.palette, required this.timeAgoText}) : super(key: key);
 
   Color hexToColor(String hex) {
     hex = hex.replaceFirst('#', '');
@@ -184,7 +355,7 @@ class PaletteCard extends StatelessWidget {
                 children: [
                   const Icon(Icons.favorite_border, size: 20),
                   Text('${palette.likes}'),
-                  Text(palette.createdAt),
+                  Text(timeAgoText),
                 ],
               ),
             ),
