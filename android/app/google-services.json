@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "212118089821",
+    "project_id": "lawwen-swe463",
+    "storage_bucket": "lawwen-swe463.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:212118089821:android:d0d5c2343b5a2f80a41db4",
+        "android_client_info": {
+          "package_name": "com.example.swe463project"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC1GnQuucsHLI47OXA_XzRG9mVRaBqXtv4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

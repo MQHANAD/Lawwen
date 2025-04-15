@@ -17,7 +17,7 @@ class PaletteModel {
 }
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -129,12 +129,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         firstDate: DateTime(2020),
                         lastDate: DateTime.now(),
                       );
-                      if (picked != null) {
-                        setSheetState(() {
-                          selectedDate = picked;
-                        });
-                      }
-                    },
+                      setSheetState(() {
+                        selectedDate = picked;
+                      });
+                                        },
                     child: Text(selectedDate == null
                         ? 'Pick Created After Date'
                         : 'Picked: ${selectedDate!.toLocal().toString().split(' ')[0]}'),
@@ -316,7 +314,7 @@ class PaletteCard extends StatelessWidget {
   final PaletteModel palette;
   final String timeAgoText;
 
-  const PaletteCard({Key? key, required this.palette, required this.timeAgoText}) : super(key: key);
+  const PaletteCard({super.key, required this.palette, required this.timeAgoText});
 
   Color hexToColor(String hex) {
     hex = hex.replaceFirst('#', '');

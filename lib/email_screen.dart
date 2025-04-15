@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:swe463project/Signup.dart';
 
 import 'Login.dart';
 import 'Verification.dart';
 
 class EmailScreen extends StatefulWidget {
-  const EmailScreen({Key? key}) : super(key: key);
+  const EmailScreen({super.key});
 
   @override
   State<EmailScreen> createState() => _EmailScreenState();
@@ -20,7 +21,9 @@ class _EmailScreenState extends State<EmailScreen> {
   }
 
   void sendVerificationCode(BuildContext context) async {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => const VerificationScreen()),
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const VerificationScreen()),
     );
     String email = emailController.text.trim();
 
@@ -57,7 +60,9 @@ class _EmailScreenState extends State<EmailScreen> {
     } catch (e) {
       Navigator.pop(context); // Remove loading spinner
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to send verification code. Please try again.')),
+        const SnackBar(
+            content:
+                Text('Failed to send verification code. Please try again.')),
       );
     }
   }
@@ -67,93 +72,92 @@ class _EmailScreenState extends State<EmailScreen> {
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(15.0),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-
-              children: [
-                const SizedBox(height: 140),
-                Image.asset('assets/images/logo.png', height: 160),
-                const SizedBox(height: 40),
-                TextFormField(
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    hintText: 'Email',
-                    filled: true,
-                    fillColor: Colors.grey.shade100,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: const Color(0xFFB1B2FF).withOpacity(0.4), width: 2),
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: const Color(0xFFB1B2FF), width: 2),
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    hintStyle: const TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 16,
-                    ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              const SizedBox(height: 140),
+              Image.asset('assets/images/logo.png', height: 160),
+              const SizedBox(height: 40),
+              TextFormField(
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(
+                  hintText: 'Email',
+                  filled: true,
+                  fillColor: Colors.grey.shade100,
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                        color: const Color(0xFFB1B2FF).withOpacity(0.4),
+                        width: 2),
+                    borderRadius: BorderRadius.circular(15),
                   ),
-
-                  onChanged: (String value) {
-
-                  },
-                  validator: (value) {
-                    return value!.isEmpty ? 'Please enter email' : null;
-                  },
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () => sendVerificationCode(context),
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 60),
-                    backgroundColor: const Color(0xFFB1B2FF),
-                    foregroundColor: Colors.white,
-                    elevation: 8,
-                    shadowColor: Colors.grey.withOpacity(0.5),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
-                    textStyle: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.bold),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide:
+                        BorderSide(color: const Color(0xFFB1B2FF), width: 2),
+                    borderRadius: BorderRadius.circular(15),
                   ),
-                  child: const Text('Send verification code'),
-                ),
-                TextButton(
-                  style: TextButton.styleFrom(
-                    foregroundColor: const Color(0xFFAAC4FF),
-                    padding: EdgeInsets.all(15),
-                    minimumSize: const Size(0, 0),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap, // Shrink wrap the tap target
+                  hintStyle: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
                   ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const LoginPage()),
-                    );
-                  },
-                  child: const Text('Sign in with Username and Password'),
                 ),
-                TextButton(
-                  style: TextButton.styleFrom(
-                    foregroundColor: const Color(0xFFAAC4FF),
-                    padding: EdgeInsets.zero,
-                    minimumSize: const Size(0, 0),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const LoginPage()),
-                    );
-                  },
-                  child: const Text("don't have an account?"),
+                onChanged: (String value) {},
+                validator: (value) {
+                  return value!.isEmpty ? 'Please enter email' : null;
+                },
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () => sendVerificationCode(context),
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 60),
+                  backgroundColor: const Color(0xFFB1B2FF),
+                  foregroundColor: Colors.white,
+                  elevation: 8,
+                  shadowColor: Colors.grey.withOpacity(0.5),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                  textStyle: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-
-              ],
-            ),
+                child: const Text('Send verification code'),
+              ),
+              TextButton(
+                style: TextButton.styleFrom(
+                  foregroundColor: const Color(0xFFAAC4FF),
+                  padding: EdgeInsets.all(15),
+                  minimumSize: const Size(0, 0),
+                  tapTargetSize: MaterialTapTargetSize
+                      .shrinkWrap, // Shrink wrap the tap target
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const LoginPage()),
+                  );
+                },
+                child: const Text('Sign in with Username and Password'),
+              ),
+              TextButton(
+                style: TextButton.styleFrom(
+                  foregroundColor: const Color(0xFFAAC4FF),
+                  padding: EdgeInsets.zero,
+                  minimumSize: const Size(0, 0),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const SignupPage()),
+                  );
+                },
+                child: const Text("don't have an account?"),
+              ),
+            ],
           ),
-
+        ),
       ),
     );
   }

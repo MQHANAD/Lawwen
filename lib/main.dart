@@ -1,16 +1,21 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'Home.dart';
-import 'Login.dart';
-import 'Verification.dart';
+
 import 'email_screen.dart';
+import 'firebase_options.dart';
+
 const Color mainColor = Color(0xFFB1B2FF);
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
 /// Root widget.
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -23,7 +28,7 @@ class MyApp extends StatelessWidget {
 }
 
 class OnboardingScreen extends StatefulWidget {
-  const OnboardingScreen({Key? key}) : super(key: key);
+  const OnboardingScreen({super.key});
   @override
   State<OnboardingScreen> createState() => _OnboardingScreenState();
 }
@@ -37,7 +42,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       'image': 'assets/images/logoGif.gif',
       'title': 'Unleash Your Creativity',
       'subtitle':
-      'Explore handpicked color palettes and create your own masterpiece.',
+          'Explore handpicked color palettes and create your own masterpiece.',
       'height': "400",
       'bottom': "310",
     },
@@ -64,7 +69,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _nextPage() {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => const EmailScreen()),
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const EmailScreen()),
     );
   }
 
@@ -196,7 +203,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(
                 _onboardingData.length,
-                    (index) => _buildIndicator(index),
+                (index) => _buildIndicator(index),
               ),
             ),
           ),
