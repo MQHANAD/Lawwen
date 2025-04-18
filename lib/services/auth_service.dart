@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:swe463project/Home.dart';
 
+import '../email_screen.dart';
+
 class AuthService {
   Future<void> signup(
       {required String email,
@@ -92,5 +94,12 @@ class AuthService {
         textColor: Colors.white,
       );
     } catch (e) {}
+  }
+
+  Future<void> signout({required BuildContext context}) async {
+    await FirebaseAuth.instance.signOut();
+    await Future.delayed(const Duration(seconds: 1));
+    Navigator.pushReplacement(context,
+        MaterialPageRoute(builder: (BuildContext context) => EmailScreen()));
   }
 }
