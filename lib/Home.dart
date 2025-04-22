@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../main.dart'; // for mainColor
+import 'package:swe463project/services/auth_service.dart';
 
 // Palette Model
 class PaletteModel {
@@ -15,6 +15,7 @@ class PaletteModel {
     required this.createdAt,
   });
 }
+
 class AnimatedLikeButton extends StatefulWidget {
   final int likes;
   const AnimatedLikeButton({Key? key, required this.likes}) : super(key: key);
@@ -40,6 +41,7 @@ class _AnimatedLikeButtonState extends State<AnimatedLikeButton>
       upperBound: 1.2,
     );
   }
+
   @override
   void dispose() {
     _controller.dispose();
@@ -54,6 +56,7 @@ class _AnimatedLikeButtonState extends State<AnimatedLikeButton>
     // Animate: scale up then back to normal
     _controller.forward().then((_) => _controller.reverse());
   }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -90,6 +93,7 @@ class _AnimatedLikeButtonState extends State<AnimatedLikeButton>
     );
   }
 }
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -139,8 +143,6 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   List<PaletteModel> displayedPalettes = [];
-
-
 
   @override
   void initState() {
@@ -275,6 +277,24 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Image.asset('assets/images/logo.png', height: 40),
               ),
             ),
+//TODO: Added this button temporarily for testing. Remove later
+            ElevatedButton(
+              onPressed: () => AuthService().signout(context: context),
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 60),
+                backgroundColor: const Color(0xFFB1B2FF),
+                foregroundColor: Colors.white,
+                elevation: 8,
+                shadowColor: Colors.grey.withOpacity(0.5),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
+                textStyle:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              child: const Text('Sign Out'),
+            ),
+            const SizedBox(height: 20),
+
             Padding(
               padding: const EdgeInsets.fromLTRB(0, 0, 0, 16),
               child: Row(
@@ -344,7 +364,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.only(topLeft: Radius.circular(29) ,topRight:Radius.circular(29)),
+                    borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(29),
+                        topRight: Radius.circular(29)),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.25),
@@ -513,11 +535,11 @@ class _PaletteCardState extends State<PaletteCard> {
                       children: widget.palette.colorHexCodes
                           .map(
                             (hex) => Expanded(
-                          child: Container(
-                            color: hexToColor(hex),
-                          ),
-                        ),
-                      )
+                              child: Container(
+                                color: hexToColor(hex),
+                              ),
+                            ),
+                          )
                           .toList(),
                     ),
                   ),
@@ -529,8 +551,8 @@ class _PaletteCardState extends State<PaletteCard> {
           Expanded(
             flex: 1,
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 8.0, vertical: 4.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -545,4 +567,3 @@ class _PaletteCardState extends State<PaletteCard> {
     );
   }
 }
-
