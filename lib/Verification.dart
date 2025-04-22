@@ -1,6 +1,100 @@
 import 'package:flutter/material.dart';
 import '../main.dart';
-import 'Home.dart'; // for mainColor
+import 'Home.dart'; // for mainCo
+import 'Favorite.dart';
+import 'Popular.dart';
+import 'PaletteCreation.dart';
+import 'Profile.dart';// lor
+import '';
+
+
+class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
+
+  @override
+  State<MainScreen> createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<MainScreen> {
+  int _selectedIndex = 0;
+
+  final List<Widget> _pages = const [
+    HomeScreen(),
+    PopularPage(),
+    Palettecreation(),
+    FavoritePage(),
+    ProfilePage(),
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _pages,
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: Colors.white, // sets the background color
+        selectedItemColor: mainColor,  // sets the color of the selected item
+        unselectedItemColor: Colors.grey,  // sets the color of non-selected items
+        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
+        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal),
+        elevation: 10,
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        items: [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          const BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Popular'),
+          BottomNavigationBarItem(
+            // Custom styling for the "Add" button.
+            icon: Container(
+              width: 79,
+              height: 45,
+              decoration: BoxDecoration(
+                color: Color(0xffAAC4FF),
+                borderRadius: BorderRadius.circular(15),
+                //shape: ,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.4),
+                    blurRadius: 4,
+                    offset:   Offset(0, 4)
+                  )
+                ],
+              ),
+              child: Column(
+                spacing: -3,
+                children: [
+                  const Icon(Icons.add, color: Colors.black),
+                  const Text(
+                    'Add',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 12
+                    ),
+                  ),
+                ],
+
+              )
+            ),
+            label: '',
+          ),
+          const BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Favorite'),
+          const BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+        ],
+      ),
+    );
+  }
+}
+
+
 
 class VerificationScreen extends StatefulWidget {
   const VerificationScreen({super.key});
@@ -8,7 +102,6 @@ class VerificationScreen extends StatefulWidget {
   @override
   State<VerificationScreen> createState() => _VerificationScreenState();
 }
-
 class _VerificationScreenState extends State<VerificationScreen> {
   late List<FocusNode> focusNodes;
   List<TextEditingController> controllers = List.generate(4, (_) => TextEditingController());
@@ -54,7 +147,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
       Navigator.pop(context); // Remove loading spinner
 
       // Simulate success
-      Navigator.push(context, MaterialPageRoute(builder: (context) => const HomeScreen()),
+      Navigator.push(context, MaterialPageRoute(builder: (context) => const MainScreen()),
       );
     } catch (e) {
       Navigator.pop(context); // Remove loading spinner

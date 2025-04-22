@@ -6,7 +6,7 @@ class PaletteModel {
   final String id;
   final List<String> colorHexCodes;
   final int likes;
-  final DateTime createdAt; // using DateTime!
+  final DateTime createdAt;
 
   PaletteModel({
     required this.id,
@@ -15,7 +15,81 @@ class PaletteModel {
     required this.createdAt,
   });
 }
+class AnimatedLikeButton extends StatefulWidget {
+  final int likes;
+  const AnimatedLikeButton({Key? key, required this.likes}) : super(key: key);
 
+  @override
+  _AnimatedLikeButtonState createState() => _AnimatedLikeButtonState();
+}
+
+class _AnimatedLikeButtonState extends State<AnimatedLikeButton>
+    with SingleTickerProviderStateMixin {
+  // Track the "liked" state
+  bool isLiked = false;
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    // Animation controller for scaling effect
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+      lowerBound: 1.0,
+      upperBound: 1.2,
+    );
+  }
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  // Toggles the like state and triggers the scale animation.
+  void toggleLike() {
+    setState(() {
+      isLiked = !isLiked;
+    });
+    // Animate: scale up then back to normal
+    _controller.forward().then((_) => _controller.reverse());
+  }
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: toggleLike,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(10, 4, 10, 4),
+        decoration: BoxDecoration(
+          border: Border.all(color: const Color(0xffCBD5E1)),
+          borderRadius: BorderRadius.circular(6.0),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ScaleTransition(
+              scale: _controller,
+              child: Icon(
+                isLiked ? Icons.favorite : Icons.favorite_border,
+                size: 26,
+                color: isLiked ? Color(0xffD2DAFF) : Colors.black,
+              ),
+            ),
+            const SizedBox(width: 5),
+            Text(
+              '${widget.likes}',
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+                color: Colors.black,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -28,43 +102,45 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<PaletteModel> allPalettes = [
     PaletteModel(
       id: "1",
-      colorHexCodes: ["c5c9ff", "d2d7ff", "e0e4ff"],
+      colorHexCodes: ["c5c9ff", "d2d7ff", "e0e4ff", "EEF1FF"],
       likes: 2,
       createdAt: DateTime.now().subtract(const Duration(hours: 2)),
     ),
     PaletteModel(
       id: "2",
-      colorHexCodes: ["212529", "495057", "0dcaf0"],
+      colorHexCodes: ["212529", "495057", "0dcaf0", "EEEEEE"],
       likes: 10,
       createdAt: DateTime.now().subtract(const Duration(days: 1)),
     ),
     PaletteModel(
       id: "3",
-      colorHexCodes: ["f8c8dc", "fdfd96", "9bf6ff"],
+      colorHexCodes: ["f8c8dc", "fdfd96", "9bf6ff", "73C7C7"],
       likes: 5,
       createdAt: DateTime.now().subtract(const Duration(hours: 5)),
     ),
     PaletteModel(
       id: "4",
-      colorHexCodes: ["c92a2a", "fa5252", "ffd6a5"],
-      likes: 15,
+      colorHexCodes: ["c92a2a", "fa5252", "ffd6a5", "F6DED8"],
+      likes: 15000,
       createdAt: DateTime.now().subtract(const Duration(hours: 10)),
     ),
     PaletteModel(
       id: "5",
-      colorHexCodes: ["f9ca24", "40739e", "273c75"],
+      colorHexCodes: ["f9ca24", "40739e", "273c75", "00cec9"],
       likes: 8,
       createdAt: DateTime.now().subtract(const Duration(days: 5)),
     ),
     PaletteModel(
       id: "6",
-      colorHexCodes: ["00cec9", "2d3436", "ff7675"],
+      colorHexCodes: ["00cec9", "2d3436", "ff7675", "00cec9"],
       likes: 3,
       createdAt: DateTime.now().subtract(const Duration(days: 7)),
     ),
   ];
 
   List<PaletteModel> displayedPalettes = [];
+
+
 
   @override
   void initState() {
@@ -95,7 +171,7 @@ class _HomeScreenState extends State<HomeScreen> {
       isScrollControlled: true,
       builder: (context) => Padding(
         padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 30,
           left: 16,
           right: 16,
           top: 24,
@@ -125,14 +201,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     onPressed: () async {
                       DateTime? picked = await showDatePicker(
                         context: context,
-                        initialDate: DateTime.now().subtract(const Duration(days: 7)),
+                        initialDate:
+                            DateTime.now().subtract(const Duration(days: 7)),
                         firstDate: DateTime(2020),
                         lastDate: DateTime.now(),
                       );
                       setSheetState(() {
                         selectedDate = picked;
                       });
-                                        },
+                    },
                     child: Text(selectedDate == null
                         ? 'Pick Created After Date'
                         : 'Picked: ${selectedDate!.toLocal().toString().split(' ')[0]}'),
@@ -187,88 +264,128 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white, // Set entire screen background to white
       body: SafeArea(
         child: Column(
           children: [
-            // Logo
+            // Logo remains at the top
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 10),
               child: Center(
                 child: Image.asset('assets/images/logo.png', height: 40),
               ),
             ),
-            // Sort and Filter
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+              padding: const EdgeInsets.fromLTRB(0, 0, 0, 16),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   GestureDetector(
                     onTap: () => showSortOptions(),
-                    child: Column(
-                      children: const [
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
                         Icon(Icons.sort, size: 28),
-                        SizedBox(height: 4),
-                        Text('Sort', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                        Text('Sorted by', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                        const SizedBox(width: 8),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const [
+                            Text(
+                              'Sort',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                  color: Color(0xff414141)),
+                            ),
+                            Text(
+                              'Sorted by',
+                              style: TextStyle(
+                                  fontSize: 12, color: Color(0xff4B5563)),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
                   GestureDetector(
                     onTap: () => showCustomizableFilterSheet(),
-                    child: Column(
-                      children: const [
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
                         Icon(Icons.filter_alt, size: 28),
-                        SizedBox(height: 4),
-                        Text('Filters', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                        Text('Custom', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                        const SizedBox(width: 8),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const [
+                            Text(
+                              'Filters',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                  color: Color(0xff414141)),
+                            ),
+                            Text(
+                              'Custom',
+                              style: TextStyle(
+                                  fontSize: 12, color: Color(0xff4B5563)),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
                 ],
               ),
             ),
-            // Palette Grid
+            // Outer Container (card-like) with upward shadow
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: GridView.builder(
-                  itemCount: displayedPalettes.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 16,
-                    crossAxisSpacing: 16,
-                    childAspectRatio: 0.7,
+                padding: const EdgeInsets.symmetric(horizontal: 0.5),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(topLeft: Radius.circular(29) ,topRight:Radius.circular(29)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.25),
+                        blurRadius: 10,
+                        offset: const Offset(
+                            0, -1), // negative offset => shadow above
+                      ),
+                    ],
                   ),
-                  itemBuilder: (context, index) {
-                    return PaletteCard(
-                      palette: displayedPalettes[index],
-                      timeAgoText: timeAgo(displayedPalettes[index].createdAt),
-                    );
-                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        // Expanded Palette Grid inside the container
+                        Expanded(
+                          child: GridView.builder(
+                            itemCount: displayedPalettes.length,
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              mainAxisSpacing: 16,
+                              crossAxisSpacing: 16,
+                              childAspectRatio: 0.7,
+                            ),
+                            itemBuilder: (context, index) {
+                              return PaletteCard(
+                                palette: displayedPalettes[index],
+                                timeAgoText:
+                                    timeAgo(displayedPalettes[index].createdAt),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
           ],
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: mainColor,
-        unselectedItemColor: Colors.grey,
-        backgroundColor: Colors.white,
-        elevation: 10,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.local_fire_department), label: 'Popular'),
-          BottomNavigationBarItem(icon: Icon(Icons.add), label: 'Add'),
-          BottomNavigationBarItem(icon: Icon(Icons.favorite_border), label: 'Favorite'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        ],
-        currentIndex: 0,
-        onTap: (index) {
-          // Handle navigation
-        },
       ),
     );
   }
@@ -276,46 +393,60 @@ class _HomeScreenState extends State<HomeScreen> {
   void showSortOptions() {
     showModalBottomSheet(
       context: context,
-      builder: (context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ListTile(
-            leading: const Icon(Icons.access_time),
-            title: const Text('Sort by Newest'),
-            onTap: () {
-              sortByNewest();
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.favorite),
-            title: const Text('Sort by Most Liked'),
-            onTap: () {
-              sortByLikes();
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.clear),
-            title: const Text('Clear Sort/Filter'),
-            onTap: () {
-              resetFilters();
-              Navigator.pop(context);
-            },
-          ),
-        ],
+      builder: (context) => Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 44),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.access_time),
+              title: const Text('Sort by Newest'),
+              onTap: () {
+                sortByNewest();
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.favorite),
+              title: const Text('Sort by Most Liked'),
+              onTap: () {
+                sortByLikes();
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.clear),
+              title: const Text('Clear Sort / Filter'),
+              onTap: () {
+                resetFilters();
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-// PaletteCard
-class PaletteCard extends StatelessWidget {
+class PaletteCard extends StatefulWidget {
   final PaletteModel palette;
   final String timeAgoText;
 
-  const PaletteCard({super.key, required this.palette, required this.timeAgoText});
+  const PaletteCard({
+    Key? key,
+    required this.palette,
+    required this.timeAgoText,
+  }) : super(key: key);
 
+  @override
+  _PaletteCardState createState() => _PaletteCardState();
+}
+
+class _PaletteCardState extends State<PaletteCard> {
+  bool _pressed = false;
+
+  // Helper function to convert hex string to Color
   Color hexToColor(String hex) {
     hex = hex.replaceFirst('#', '');
     return Color(int.parse('FF$hex', radix: 16));
@@ -323,37 +454,88 @@ class PaletteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Define a transformation matrix for the 3D press effect
+    final Matrix4 transform = Matrix4.identity()
+      ..setEntry(3, 2, 0.001) // adds perspective
+      ..rotateX(_pressed ? 0.05 : 0) // slight X-axis rotation when pressed
+      ..rotateY(_pressed ? 0.02 : 0) // slight Y-axis rotation when pressed
+      ..scale(_pressed ? 0.97 : 1.0); // scale down a bit when pressed
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.white, // background for the card
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(color: Colors.grey.shade300, blurRadius: 10)],
       ),
       child: Column(
         children: [
+          // Only the first Expanded (color display area) has GestureDetector
           Expanded(
             flex: 3,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: Column(
-                children: palette.colorHexCodes.map((hexCode) {
-                  return Expanded(
-                    child: Container(color: hexToColor(hexCode)),
-                  );
-                }).toList(),
+            child: GestureDetector(
+              onTap: () {
+                // Print the palette colors when tapped
+                print("Palette colors: ${widget.palette.colorHexCodes}");
+              },
+              onTapDown: (_) {
+                setState(() {
+                  _pressed = true;
+                });
+              },
+              onTapUp: (_) {
+                setState(() {
+                  _pressed = false;
+                });
+              },
+              onTapCancel: () {
+                setState(() {
+                  _pressed = false;
+                });
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 100),
+                curve: Curves.easeOut,
+                transform: transform,
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 10,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    // Display colors in a vertical layout
+                    child: Column(
+                      children: widget.palette.colorHexCodes
+                          .map(
+                            (hex) => Expanded(
+                          child: Container(
+                            color: hexToColor(hex),
+                          ),
+                        ),
+                      )
+                          .toList(),
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
+          // Second Expanded remains unaffected by the GestureDetector.
           Expanded(
             flex: 1,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 8.0, vertical: 4.0),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Icon(Icons.favorite_border, size: 20),
-                  Text('${palette.likes}'),
-                  Text(timeAgoText),
+                  AnimatedLikeButton(likes: widget.palette.likes),
+                  Text(widget.timeAgoText),
                 ],
               ),
             ),
@@ -363,3 +545,4 @@ class PaletteCard extends StatelessWidget {
     );
   }
 }
+
