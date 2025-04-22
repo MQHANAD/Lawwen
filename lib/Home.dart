@@ -1,98 +1,8 @@
+// lib/screens/home_screen.dart
 import 'package:flutter/material.dart';
-import 'package:swe463project/services/auth_service.dart';
-
-// Palette Model
-class PaletteModel {
-  final String id;
-  final List<String> colorHexCodes;
-  final int likes;
-  final DateTime createdAt;
-
-  PaletteModel({
-    required this.id,
-    required this.colorHexCodes,
-    required this.likes,
-    required this.createdAt,
-  });
-}
-
-class AnimatedLikeButton extends StatefulWidget {
-  final int likes;
-  const AnimatedLikeButton({Key? key, required this.likes}) : super(key: key);
-
-  @override
-  _AnimatedLikeButtonState createState() => _AnimatedLikeButtonState();
-}
-
-class _AnimatedLikeButtonState extends State<AnimatedLikeButton>
-    with SingleTickerProviderStateMixin {
-  // Track the "liked" state
-  bool isLiked = false;
-  late AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    // Animation controller for scaling effect
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 200),
-      lowerBound: 1.0,
-      upperBound: 1.2,
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  // Toggles the like state and triggers the scale animation.
-  void toggleLike() {
-    setState(() {
-      isLiked = !isLiked;
-    });
-    // Animate: scale up then back to normal
-    _controller.forward().then((_) => _controller.reverse());
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: toggleLike,
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(10, 4, 10, 4),
-        decoration: BoxDecoration(
-          border: Border.all(color: const Color(0xffCBD5E1)),
-          borderRadius: BorderRadius.circular(6.0),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ScaleTransition(
-              scale: _controller,
-              child: Icon(
-                isLiked ? Icons.favorite : Icons.favorite_border,
-                size: 26,
-                color: isLiked ? Color(0xffD2DAFF) : Colors.black,
-              ),
-            ),
-            const SizedBox(width: 5),
-            Text(
-              '${widget.likes}',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-                color: Colors.black,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+import '../models/palette_model.dart';
+import '../widgets/palette_card.dart';
+import '../services/auth_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -150,7 +60,6 @@ class _HomeScreenState extends State<HomeScreen> {
     displayedPalettes = List.from(allPalettes);
   }
 
-  // Sort functions
   void sortByNewest() {
     setState(() {
       displayedPalettes.sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -163,7 +72,6 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  // Customizable filter logic
   void showCustomizableFilterSheet() {
     int minLikes = 0;
     DateTime? selectedDate;
@@ -184,7 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Likes Input
+                  // Minimum Likes Input Field
                   TextField(
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(
@@ -198,13 +106,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                   ),
                   const SizedBox(height: 20),
-                  // Date Picker
+                  // Date Picker Button
                   ElevatedButton(
                     onPressed: () async {
                       DateTime? picked = await showDatePicker(
                         context: context,
                         initialDate:
-                            DateTime.now().subtract(const Duration(days: 7)),
+                        DateTime.now().subtract(const Duration(days: 7)),
                         firstDate: DateTime(2020),
                         lastDate: DateTime.now(),
                       );
@@ -217,7 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         : 'Picked: ${selectedDate!.toLocal().toString().split(' ')[0]}'),
                   ),
                   const SizedBox(height: 20),
-                  // Apply Button
+                  // Apply Filters Button
                   ElevatedButton(
                     onPressed: () {
                       applyCustomFilters(minLikes, selectedDate);
@@ -251,7 +159,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  // Helper to format "x hours ago"
+  // Helper to display "x time ago"
   String timeAgo(DateTime date) {
     final Duration diff = DateTime.now().difference(date);
     if (diff.inMinutes < 60) {
@@ -261,155 +169,6 @@ class _HomeScreenState extends State<HomeScreen> {
     } else {
       return '${diff.inDays}d ago';
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white, // Set entire screen background to white
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Logo remains at the top
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: Center(
-                child: Image.asset('assets/images/logo.png', height: 40),
-              ),
-            ),
-//TODO: Added this button temporarily for testing. Remove later
-            ElevatedButton(
-              onPressed: () => AuthService().signout(context: context),
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 60),
-                backgroundColor: const Color(0xFFB1B2FF),
-                foregroundColor: Colors.white,
-                elevation: 8,
-                shadowColor: Colors.grey.withOpacity(0.5),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
-                textStyle:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              child: const Text('Sign Out'),
-            ),
-            const SizedBox(height: 20),
-
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 0, 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  GestureDetector(
-                    onTap: () => showSortOptions(),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Icon(Icons.sort, size: 28),
-                        const SizedBox(width: 8),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
-                            Text(
-                              'Sort',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
-                                  color: Color(0xff414141)),
-                            ),
-                            Text(
-                              'Sorted by',
-                              style: TextStyle(
-                                  fontSize: 12, color: Color(0xff4B5563)),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () => showCustomizableFilterSheet(),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Icon(Icons.filter_alt, size: 28),
-                        const SizedBox(width: 8),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
-                            Text(
-                              'Filters',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
-                                  color: Color(0xff414141)),
-                            ),
-                            Text(
-                              'Custom',
-                              style: TextStyle(
-                                  fontSize: 12, color: Color(0xff4B5563)),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            // Outer Container (card-like) with upward shadow
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 0.5),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(29),
-                        topRight: Radius.circular(29)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.25),
-                        blurRadius: 10,
-                        offset: const Offset(
-                            0, -1), // negative offset => shadow above
-                      ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        // Expanded Palette Grid inside the container
-                        Expanded(
-                          child: GridView.builder(
-                            itemCount: displayedPalettes.length,
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              mainAxisSpacing: 16,
-                              crossAxisSpacing: 16,
-                              childAspectRatio: 0.7,
-                            ),
-                            itemBuilder: (context, index) {
-                              return PaletteCard(
-                                palette: displayedPalettes[index],
-                                timeAgoText:
-                                    timeAgo(displayedPalettes[index].createdAt),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   void showSortOptions() {
@@ -449,121 +208,149 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-}
-
-class PaletteCard extends StatefulWidget {
-  final PaletteModel palette;
-  final String timeAgoText;
-
-  const PaletteCard({
-    Key? key,
-    required this.palette,
-    required this.timeAgoText,
-  }) : super(key: key);
-
-  @override
-  _PaletteCardState createState() => _PaletteCardState();
-}
-
-class _PaletteCardState extends State<PaletteCard> {
-  bool _pressed = false;
-
-  // Helper function to convert hex string to Color
-  Color hexToColor(String hex) {
-    hex = hex.replaceFirst('#', '');
-    return Color(int.parse('FF$hex', radix: 16));
-  }
 
   @override
   Widget build(BuildContext context) {
-    // Define a transformation matrix for the 3D press effect
-    final Matrix4 transform = Matrix4.identity()
-      ..setEntry(3, 2, 0.001) // adds perspective
-      ..rotateX(_pressed ? 0.05 : 0) // slight X-axis rotation when pressed
-      ..rotateY(_pressed ? 0.02 : 0) // slight Y-axis rotation when pressed
-      ..scale(_pressed ? 0.97 : 1.0); // scale down a bit when pressed
-
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white, // background for the card
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        children: [
-          // Only the first Expanded (color display area) has GestureDetector
-          Expanded(
-            flex: 3,
-            child: GestureDetector(
-              onTap: () {
-                // Print the palette colors when tapped
-                print("Palette colors: ${widget.palette.colorHexCodes}");
-              },
-              onTapDown: (_) {
-                setState(() {
-                  _pressed = true;
-                });
-              },
-              onTapUp: (_) {
-                setState(() {
-                  _pressed = false;
-                });
-              },
-              onTapCancel: () {
-                setState(() {
-                  _pressed = false;
-                });
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 100),
-                curve: Curves.easeOut,
-                transform: transform,
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Top Logo
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: Center(
+                child: Image.asset('assets/images/logo.png', height: 40),
+              ),
+            ),
+            // Temporary Sign Out Button for Testing
+            ElevatedButton(
+              onPressed: () => AuthService().signout(context: context),
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 60),
+                backgroundColor: const Color(0xFFB1B2FF),
+                foregroundColor: Colors.white,
+                elevation: 8,
+                shadowColor: Colors.grey.withOpacity(0.5),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
+                textStyle:
+                const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              child: const Text('Sign Out'),
+            ),
+            const SizedBox(height: 20),
+            // Sort and Filter Options
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 0, 0, 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  GestureDetector(
+                    onTap: () => showSortOptions(),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.import_export_outlined, size: 28, color: Colors.black54),
+                        const SizedBox(width: 8),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const [
+                            Text(
+                              'Sort',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                  color: Color(0xff414141)),
+                            ),
+                            Text(
+                              'Sorted by',
+                              style: TextStyle(
+                                  fontSize: 12, color: Color(0xff4B5563)),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => showCustomizableFilterSheet(),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.color_lens_outlined, size: 28, color: Colors.black54),
+                        const SizedBox(width: 8),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const [
+                            Text(
+                              'Filters',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                  color: Color(0xff414141)),
+                            ),
+                            Text(
+                              'Custom',
+                              style: TextStyle(
+                                  fontSize: 12, color: Color(0xff4B5563)),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Palettes Grid View
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 0.5),
                 child: Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: const [
+                    color: Colors.white,
+                    borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(29),
+                        topRight: Radius.circular(29)),
+                    boxShadow: [
                       BoxShadow(
-                        color: Colors.black26,
+                        color: Colors.black.withOpacity(0.25),
                         blurRadius: 10,
-                        offset: Offset(0, 4),
+                        offset: const Offset(0, -1),
                       ),
                     ],
                   ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    // Display colors in a vertical layout
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
                     child: Column(
-                      children: widget.palette.colorHexCodes
-                          .map(
-                            (hex) => Expanded(
-                              child: Container(
-                                color: hexToColor(hex),
-                              ),
+                      children: [
+                        Expanded(
+                          child: GridView.builder(
+                            itemCount: displayedPalettes.length,
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              mainAxisSpacing: 16,
+                              crossAxisSpacing: 16,
+                              childAspectRatio: 0.7,
                             ),
-                          )
-                          .toList(),
+                            itemBuilder: (context, index) {
+                              return PaletteCard(
+                                palette: displayedPalettes[index],
+                                timeAgoText: timeAgo(
+                                    displayedPalettes[index].createdAt),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-          // Second Expanded remains unaffected by the GestureDetector.
-          Expanded(
-            flex: 1,
-            child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  AnimatedLikeButton(likes: widget.palette.likes),
-                  Text(widget.timeAgoText),
-                ],
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
+

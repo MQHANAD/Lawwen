@@ -50,8 +50,8 @@ class _MainScreenState extends State<MainScreen> {
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          const BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Popular'),
+          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'Home'),
+          const BottomNavigationBarItem(icon: Icon(Icons.whatshot_outlined), label: 'Popular'),
           BottomNavigationBarItem(
             // Custom styling for the "Add" button.
             icon: Container(
@@ -70,14 +70,14 @@ class _MainScreenState extends State<MainScreen> {
                 ],
               ),
               child: Column(
-                spacing: -3,
+                spacing: 0,
                 children: [
                   const Icon(Icons.add, color: Colors.black),
                   const Text(
                     'Add',
                     style: TextStyle(
                       color: Colors.black,
-                      fontSize: 12
+                      fontSize: 10
                     ),
                   ),
                 ],
@@ -86,8 +86,8 @@ class _MainScreenState extends State<MainScreen> {
             ),
             label: '',
           ),
-          const BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Favorite'),
-          const BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          const BottomNavigationBarItem(icon: Icon(Icons.favorite_outline), label: 'Favorite'),
+          const BottomNavigationBarItem(icon: Icon(Icons.person_2_outlined), label: 'Profile'),
         ],
       ),
     );
