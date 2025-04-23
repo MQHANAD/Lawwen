@@ -1,5 +1,6 @@
 // lib/widgets/palette_card.dart
 import 'package:flutter/material.dart';
+import '../PaletteDetails.dart';
 import '../models/palette_model.dart';
 import 'animated_like_button.dart';
 
@@ -48,6 +49,32 @@ class _PaletteCardState extends State<PaletteCard> {
             child: GestureDetector(
               onTap: () {
                 print("Palette colors: ${widget.palette.colorHexCodes}");
+                // Navigator.push(context, MaterialPageRoute(builder: (context) => PaletteInfoScreen(palette: widget.palette,)),
+                // );
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true, // Allows full-screen height if needed.
+                  backgroundColor: Colors.transparent, // So your custom rounded container shows properly.
+                  builder: (BuildContext context) {
+                    return DraggableScrollableSheet(
+                      initialChildSize: 0.86, // Adjust as needed.
+                      minChildSize: 0.5,
+                      maxChildSize: 1.0,
+                      builder: (BuildContext context, ScrollController scrollController) {
+                        return Container(
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                          ),
+                            child: PaletteInfoScreen(
+                              palette: widget.palette,
+                            ),
+                        );
+                      },
+                    );
+                  },
+                );
+
               },
               onTapDown: (_) {
                 setState(() {
