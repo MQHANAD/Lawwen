@@ -12,7 +12,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // Full list of palettes
+  // Full list of palettes.
   final List<PaletteModel> allPalettes = [
     PaletteModel(
       id: "1",
@@ -52,7 +52,21 @@ class _HomeScreenState extends State<HomeScreen> {
     ),
   ];
 
+  // The displayed palettes can be filtered.
   List<PaletteModel> displayedPalettes = [];
+
+  // Essential colors used in the filter UI.
+  final List<Color> essentialColors = [
+    Colors.red,
+    Colors.orange,
+    Colors.yellow,
+    Colors.green,
+    Colors.blue,
+    Colors.indigo,
+    Colors.purple,
+    Colors.brown,
+    Colors.grey,
+  ];
 
   @override
   void initState() {
@@ -72,10 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  void showCustomizableFilterSheet() {
-    int minLikes = 0;
-    DateTime? selectedDate;
-
+  void showEssentialColorFilterSheet() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -86,77 +97,113 @@ class _HomeScreenState extends State<HomeScreen> {
           right: 16,
           top: 24,
         ),
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setSheetState) {
-            return SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Minimum Likes Input Field
-                  TextField(
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Minimum Likes',
-                      border: OutlineInputBorder(),
-                    ),
-                    onChanged: (value) {
-                      setSheetState(() {
-                        minLikes = int.tryParse(value) ?? 0;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  // Date Picker Button
-                  ElevatedButton(
-                    onPressed: () async {
-                      DateTime? picked = await showDatePicker(
-                        context: context,
-                        initialDate:
-                        DateTime.now().subtract(const Duration(days: 7)),
-                        firstDate: DateTime(2020),
-                        lastDate: DateTime.now(),
-                      );
-                      setSheetState(() {
-                        selectedDate = picked;
-                      });
-                    },
-                    child: Text(selectedDate == null
-                        ? 'Pick Created After Date'
-                        : 'Picked: ${selectedDate!.toLocal().toString().split(' ')[0]}'),
-                  ),
-                  const SizedBox(height: 20),
-                  // Apply Filters Button
-                  ElevatedButton(
-                    onPressed: () {
-                      applyCustomFilters(minLikes, selectedDate);
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Select a Filter Color',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              const SizedBox(height: 16),
+              // Display essential colors in a grid (4 per row)
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: essentialColors.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 4,
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
+                ),
+                itemBuilder: (context, index) {
+                  final color = essentialColors[index];
+                  return GestureDetector(
+                    onTap: () {
+                      applyEssentialColorFilter(color);
                       Navigator.pop(context);
                     },
-                    child: const Text('Apply Filters'),
-                  ),
-                  const SizedBox(height: 20),
-                ],
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: color,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  );
+                },
               ),
-            );
-          },
+
+              ListTile(
+                leading: const Icon(Icons.clear),
+                title: const Text('Clear Sort / Filter'),
+                onTap: () {
+                  setState(() {
+                    displayedPalettes = List.from(allPalettes);
+                  });
+                  Navigator.pop(context);
+                },
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  void applyCustomFilters(int minLikes, DateTime? createdAfter) {
+  /// Apply filter based on the selected color.
+  /// If [filterColor] is null, resets to show all palettes.
+  void applyEssentialColorFilter(Color? filterColor) {
     setState(() {
-      displayedPalettes = allPalettes.where((p) {
-        bool likesOk = p.likes >= minLikes;
-        bool dateOk = createdAfter == null || p.createdAt.isAfter(createdAfter);
-        return likesOk && dateOk;
-      }).toList();
+      if (filterColor == null) {
+        // Reset filter if no color selected.
+        displayedPalettes = List.from(allPalettes);
+      } else {
+        displayedPalettes = allPalettes.where((palette) {
+          // Check if any color in the palette is close to the filter color.
+          for (final hex in palette.colorHexCodes) {
+            Color paletteColor = _hexToColor(hex);
+            if (isColorClose(paletteColor, filterColor)) {
+              return true;
+            }
+          }
+          return false;
+        }).toList();
+      }
     });
   }
 
-  void resetFilters() {
-    setState(() {
-      displayedPalettes = List.from(allPalettes);
-    });
+  /// Returns true if [c1] is "close" to [c2] based on hue difference.
+  bool isColorClose(
+      Color c1,
+      Color c2, {
+        double hueThreshold = 20,
+        double saturationThreshold = 0.2,
+        double lightnessThreshold = 0.2,
+      }) {
+    // Convert both colors to HSL.
+    final hsl1 = HSLColor.fromColor(c1);
+    final hsl2 = HSLColor.fromColor(c2);
+
+    // Calculate the hue difference (taking circular nature into account).
+    double hueDiff = (hsl1.hue - hsl2.hue).abs();
+    if (hueDiff > 180) hueDiff = 360 - hueDiff;
+
+    // Calculate differences in saturation and lightness.
+    final saturationDiff = (hsl1.saturation - hsl2.saturation).abs();
+    final lightnessDiff = (hsl1.lightness - hsl2.lightness).abs();
+
+    // Return true only if all conditions are met.
+    return (hueDiff <= hueThreshold) &&
+        (saturationDiff <= saturationThreshold) &&
+        (lightnessDiff <= lightnessThreshold);
+  }
+
+
+  /// Helper function to convert a hex string to a Color.
+  Color _hexToColor(String hex) {
+    String sanitized = hex.replaceAll('#', '').trim();
+    return Color(int.parse('FF$sanitized', radix: 16));
   }
 
   // Helper to display "x time ago"
@@ -199,7 +246,9 @@ class _HomeScreenState extends State<HomeScreen> {
               leading: const Icon(Icons.clear),
               title: const Text('Clear Sort / Filter'),
               onTap: () {
-                resetFilters();
+                setState(() {
+                  displayedPalettes = List.from(allPalettes);
+                });
                 Navigator.pop(context);
               },
             ),
@@ -250,7 +299,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     onTap: () => showSortOptions(),
                     child: Row(
                       children: [
-                        const Icon(Icons.import_export_outlined, size: 28, color: Colors.black54),
+                        const Icon(Icons.import_export_outlined,
+                            size: 28, color: Colors.black54),
                         const SizedBox(width: 8),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -273,10 +323,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   GestureDetector(
-                    onTap: () => showCustomizableFilterSheet(),
+                    onTap: () => showEssentialColorFilterSheet(),
                     child: Row(
                       children: [
-                        const Icon(Icons.color_lens_outlined, size: 28, color: Colors.black54),
+                        const Icon(Icons.color_lens_outlined,
+                            size: 28, color: Colors.black54),
                         const SizedBox(width: 8),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -289,7 +340,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   color: Color(0xff414141)),
                             ),
                             Text(
-                              'Custom',
+                              'Essential',
                               style: TextStyle(
                                   fontSize: 12, color: Color(0xff4B5563)),
                             ),
@@ -326,7 +377,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         Expanded(
                           child: GridView.builder(
                             itemCount: displayedPalettes.length,
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 2,
                               mainAxisSpacing: 16,
                               crossAxisSpacing: 16,
@@ -335,8 +387,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             itemBuilder: (context, index) {
                               return PaletteCard(
                                 palette: displayedPalettes[index],
-                                timeAgoText: timeAgo(
-                                    displayedPalettes[index].createdAt),
+                                timeAgoText:
+                                timeAgo(displayedPalettes[index].createdAt),
                               );
                             },
                           ),
@@ -353,4 +405,3 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
-

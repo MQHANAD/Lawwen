@@ -38,6 +38,8 @@ dependencies:
   firebase_auth: ^5.5.2
   fluttertoast: ^8.2.12
   flutter_dotenv: ^5.0.2
+  flutter_colorpicker: ^1.1.0
+  flex_color_picker: ^3.7.0
 
 dev_dependencies:
   flutter_test:
