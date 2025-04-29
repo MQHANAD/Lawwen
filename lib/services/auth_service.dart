@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:swe463project/Home.dart';
 
 import '../email_screen.dart';
@@ -101,5 +102,42 @@ class AuthService {
     await Future.delayed(const Duration(seconds: 1));
     Navigator.pushReplacement(context,
         MaterialPageRoute(builder: (BuildContext context) => EmailScreen()));
+  }
+
+  Future<void> passwordless({
+    required String email,
+    required BuildContext context,
+  }) async {
+    try {
+      final ActionCodeSettings acs = ActionCodeSettings(
+        url:
+            'https://lawwen.page.link/jdF1', // ✅ your dynamic link domain or Firebase Hosting
+        handleCodeInApp: true,
+        androidPackageName: 'com.example.swe463project',
+        androidInstallApp: true,
+        androidMinimumVersion: '21',
+        iOSBundleId: 'com.example.swe463project', // ✅ match your iOS bundle
+      );
+
+      await FirebaseAuth.instance.sendSignInLinkToEmail(
+        email: email,
+        actionCodeSettings: acs,
+      );
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('emailForSignIn', email);
+
+      Fluttertoast.showToast(
+        msg: "Verification link sent! Check your email.",
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+      );
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: "Error sending verification email: ${e.toString()}",
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
+    }
   }
 }

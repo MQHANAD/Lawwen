@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:magic_sdk/magic_sdk.dart';
 import 'package:swe463project/Signup.dart';
 
 import 'Login.dart';
@@ -79,51 +80,62 @@ class _EmailScreenState extends State<EmailScreen> {
               const SizedBox(height: 140),
               Image.asset('assets/images/logo.png', height: 160),
               const SizedBox(height: 40),
-              TextFormField(
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  hintText: 'Email',
-                  filled: true,
-                  fillColor: Colors.grey.shade100,
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                        color: const Color(0xFFB1B2FF).withOpacity(0.4),
-                        width: 2),
-                    borderRadius: BorderRadius.circular(15),
+              Stack(children: [
+                TextFormField(
+                  controller: emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: InputDecoration(
+                    hintText: 'Email',
+                    filled: true,
+                    fillColor: Colors.grey.shade100,
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 18),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                          color: const Color(0xFFB1B2FF).withOpacity(0.4),
+                          width: 2),
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide:
+                          BorderSide(color: const Color(0xFFB1B2FF), width: 2),
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    hintStyle: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 16,
+                    ),
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide:
-                        BorderSide(color: const Color(0xFFB1B2FF), width: 2),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  hintStyle: const TextStyle(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 16,
-                  ),
+                  onChanged: (String value) {},
+                  validator: (value) {
+                    return value!.isEmpty ? 'Please enter email' : null;
+                  },
                 ),
-                onChanged: (String value) {},
-                validator: (value) {
-                  return value!.isEmpty ? 'Please enter email' : null;
-                },
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () => sendVerificationCode(context),
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 60),
-                  backgroundColor: const Color(0xFFB1B2FF),
-                  foregroundColor: Colors.white,
-                  elevation: 8,
-                  shadowColor: Colors.grey.withOpacity(0.5),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                  textStyle: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () async {
+                    try {
+                      var token = await Magic.instance.auth.loginWithEmailOTP(
+                          email: emailController.text.trim());
+                    } catch (e) {
+                      print("Error: $e");
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 60),
+                    backgroundColor: const Color(0xFFB1B2FF),
+                    foregroundColor: Colors.white,
+                    elevation: 8,
+                    shadowColor: Colors.grey.withOpacity(0.5),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
+                    textStyle: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  child: const Text('Send verification code'),
                 ),
-                child: const Text('Send verification code'),
-              ),
+                Magic.instance.relayer
+              ]),
               TextButton(
                 style: TextButton.styleFrom(
                   foregroundColor: const Color(0xFFAAC4FF),

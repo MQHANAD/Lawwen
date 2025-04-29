@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+
 import '../main.dart';
-import 'Home.dart'; // for mainCo
 import 'Favorite.dart';
-import 'Popular.dart';
+import 'Home.dart'; // for mainCo
 import 'PaletteCreation.dart';
+import 'Popular.dart';
 import 'Profile.dart'; // lor
 
 class MainScreen extends StatefulWidget {
@@ -80,20 +81,20 @@ class _MainScreenState extends State<MainScreen> {
                     showModalBottomSheet(
                       context: context,
                       isScrollControlled: true,
-                      backgroundColor:
-                      Colors.transparent, // Let custom container show its round corners
+                      backgroundColor: Colors
+                          .transparent, // Let custom container show its round corners
                       builder: (BuildContext context) {
                         return DraggableScrollableSheet(
                           initialChildSize: 0.86,
                           minChildSize: 0.5,
                           maxChildSize: 1.0,
-                          builder:
-                              (BuildContext context, ScrollController scrollController) {
+                          builder: (BuildContext context,
+                              ScrollController scrollController) {
                             return Container(
                               decoration: const BoxDecoration(
                                 color: Colors.white,
-                                borderRadius:
-                                BorderRadius.vertical(top: Radius.circular(20)),
+                                borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(20)),
                               ),
                               child: CreatePaletteModal(),
                             );
@@ -106,10 +107,10 @@ class _MainScreenState extends State<MainScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: const [
                       Icon(Icons.add, color: Colors.black),
-                      Text(
-                        'Add',
-                        style: TextStyle(color: Colors.black, fontSize: 10),
-                      ),
+                      // Text(
+                      //   'Add',
+                      //   style: TextStyle(color: Colors.black, fontSize: 10),
+                      // ),
                     ],
                   ),
                 ),
@@ -137,7 +138,7 @@ class VerificationScreen extends StatefulWidget {
 class _VerificationScreenState extends State<VerificationScreen> {
   late List<FocusNode> focusNodes;
   List<TextEditingController> controllers =
-  List.generate(4, (_) => TextEditingController());
+      List.generate(4, (_) => TextEditingController());
 
   @override
   void initState() {
@@ -256,7 +257,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 textStyle:
-                const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               child: const Text('Verify'),
             ),
