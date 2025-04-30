@@ -20,7 +20,7 @@ Future<void> savePaletteToFirestore({
     'createdAt': Timestamp.now(),
   });
 }
-//EXAMPLE GETT
+//Example Getter:
 //
 // await savePaletteToFirestore(
 // title: 'Cool Summer',

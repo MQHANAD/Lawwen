@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:magic_sdk/magic_sdk.dart';
 import 'package:swe463project/Signup.dart';
 
 import 'Login.dart';
@@ -113,14 +112,7 @@ class _EmailScreenState extends State<EmailScreen> {
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: () async {
-                    try {
-                      var token = await Magic.instance.auth.loginWithEmailOTP(
-                          email: emailController.text.trim());
-                    } catch (e) {
-                      print("Error: $e");
-                    }
-                  },
+                  onPressed: () async {},
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(double.infinity, 60),
                     backgroundColor: const Color(0xFFB1B2FF),
@@ -134,7 +126,6 @@ class _EmailScreenState extends State<EmailScreen> {
                   ),
                   child: const Text('Send verification code'),
                 ),
-                Magic.instance.relayer
               ]),
               TextButton(
                 style: TextButton.styleFrom(
