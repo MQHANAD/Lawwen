@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:swe463project/Signup.dart';
 
+import 'Home.dart';
 import 'Login.dart';
 import 'Verification.dart';
 
@@ -23,7 +24,7 @@ class _EmailScreenState extends State<EmailScreen> {
   void sendVerificationCode(BuildContext context) async {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const VerificationScreen()),
+      MaterialPageRoute(builder: (context) => const HomeScreen()),
     );
     String email = emailController.text.trim();
 
