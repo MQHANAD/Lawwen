@@ -2,9 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:swe463project/Home.dart';
-
-import '../email_screen.dart';
+import '../main.dart';
 
 class AuthService {
   Future<void> signup(
@@ -15,10 +13,7 @@ class AuthService {
       await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
       await Future.delayed(const Duration(seconds: 1));
-      Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-              builder: (BuildContext context) => const HomeScreen()));
+      Navigator.of(context).pop();
     } on FirebaseAuthException catch (e) {
       String message;
 
@@ -57,10 +52,7 @@ class AuthService {
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
       await Future.delayed(const Duration(seconds: 1));
-      Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-              builder: (BuildContext context) => const HomeScreen()));
+      Navigator.of(context).pop();
     } on FirebaseAuthException catch (e) {
       String message;
 
@@ -101,7 +93,7 @@ class AuthService {
     await FirebaseAuth.instance.signOut();
     await Future.delayed(const Duration(seconds: 1));
     Navigator.pushReplacement(context,
-        MaterialPageRoute(builder: (BuildContext context) => EmailScreen()));
+        MaterialPageRoute(builder: (BuildContext context) => MainScreen()));
   }
 
   Future<void> passwordless({

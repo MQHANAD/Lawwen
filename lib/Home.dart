@@ -88,6 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void showEssentialColorFilterSheet() {
     showModalBottomSheet(
+      backgroundColor: Colors.white,
       context: context,
       isScrollControlled: true,
       builder: (context) => Padding(
@@ -220,6 +221,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void showSortOptions() {
     showModalBottomSheet(
+      backgroundColor: Colors.white,
       context: context,
       builder: (context) => Padding(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 44),
@@ -273,21 +275,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             // Temporary Sign Out Button for Testing
-            ElevatedButton(
-              onPressed: () => AuthService().signout(context: context),
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 60),
-                backgroundColor: const Color(0xFFB1B2FF),
-                foregroundColor: Colors.white,
-                elevation: 8,
-                shadowColor: Colors.grey.withOpacity(0.5),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
-                textStyle:
-                const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              child: const Text('Sign Out'),
-            ),
             const SizedBox(height: 20),
             // Sort and Filter Options
             Padding(

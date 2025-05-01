@@ -12,8 +12,8 @@
 
 ## Tech Stack
 - **Frontend**: Flutter (Dart)
-- **Backend**: TBD (Possible Firebase/SQL-based backend)
-- **Authentication**: Firebase Authentication (or custom solution)
+- **Backend**: Firebase
+- **Authentication**: Firebase Authentication
 
 ## Team Members
 - **Muhannad Alduraywish**

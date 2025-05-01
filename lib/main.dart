@@ -5,9 +5,190 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:swe463project/Login.dart';
+import 'Favorite.dart';
 import 'Home.dart';
-import 'email_screen.dart';
+import 'PaletteCreation.dart';
+import 'Popular.dart';
+import 'Profile.dart';
 import 'firebase_config.dart';
+
+class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
+
+  @override
+  State<MainScreen> createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<MainScreen> {
+  int _selectedIndex = 0;
+
+  final List<Widget> _pages = const [
+    HomeScreen(),
+    PopularPage(),
+    HomeScreen(),
+    FavoritePage(),
+    ProfilePage(),
+  ];
+
+  bool get _isLoggedIn => FirebaseAuth.instance.currentUser != null;
+  void _onItemTapped(int index) {
+    if (!_isLoggedIn && index == 4) {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors
+            .transparent, // Let custom container show its round corners
+        builder: (BuildContext context) {
+          return DraggableScrollableSheet(
+            initialChildSize: 0.86,
+            minChildSize: 0.5,
+            maxChildSize: 1.0,
+            builder: (BuildContext context,
+                ScrollController scrollController) {
+              return Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(20)),
+                ),
+                child: LoginPage(),
+              );
+            },
+          );
+        },
+      );
+      return;
+    }
+    // We disable changing the selected tab when tapping index 2 (Add button)
+    else if (index == 2) return;
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _pages,
+      ),
+      bottomNavigationBar: Theme(
+        data: Theme.of(context).copyWith(
+          splashFactory: NoSplash.splashFactory,
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+        ),
+        child: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: Colors.white,
+          selectedItemColor: mainColor,
+          unselectedItemColor: Colors.grey,
+          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
+          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal),
+          elevation: 10,
+          currentIndex: _selectedIndex,
+          onTap: _onItemTapped,
+          items: [
+            BottomNavigationBarItem(
+                icon: Icon(Icons.home_outlined), label: 'Home'),
+            const BottomNavigationBarItem(
+                icon: Icon(Icons.whatshot_outlined), label: 'Popular'),
+            BottomNavigationBarItem(
+              // Custom styling for the "Add" button.
+              icon: Container(
+                width: 79,
+                height: 45,
+                decoration: BoxDecoration(
+                  color: const Color(0xffAAC4FF),
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: [
+                    BoxShadow(
+                        color: Colors.black.withOpacity(0.4),
+                        blurRadius: 4,
+                        offset: Offset(0, 4))
+                  ],
+                ),
+                child: GestureDetector(
+                  onTap: () {
+                    if (_isLoggedIn) {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors
+                            .transparent, // Let custom container show its round corners
+                        builder: (BuildContext context) {
+                          return DraggableScrollableSheet(
+                            initialChildSize: 0.86,
+                            minChildSize: 0.5,
+                            maxChildSize: 1.0,
+                            builder: (BuildContext context,
+                                ScrollController scrollController) {
+                              return Container(
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.vertical(
+                                      top: Radius.circular(20)),
+                                ),
+                                child: CreatePaletteModal(),
+                              );
+                            },
+                          );
+                        },
+                      );
+                    }
+                    else{
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors
+                            .transparent, // Let custom container show its round corners
+                        builder: (BuildContext context) {
+                          return DraggableScrollableSheet(
+                            initialChildSize: 0.86,
+                            minChildSize: 0.5,
+                            maxChildSize: 1.0,
+                            builder: (BuildContext context,
+                                ScrollController scrollController) {
+                              return Container(
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.vertical(
+                                      top: Radius.circular(20)),
+                                ),
+                                child: LoginPage(),
+                              );
+                            },
+                          );
+                        },
+                      );
+                    }
+                  },
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(Icons.add, color: Colors.black),
+                      // Text(
+                      //   'Add',
+                      //   style: TextStyle(color: Colors.black, fontSize: 10),
+                      // ),
+                    ],
+                  ),
+                ),
+              ),
+              label: '',
+            ),
+            const BottomNavigationBarItem(
+                icon: Icon(Icons.favorite_outline), label: 'Favorite'),
+            const BottomNavigationBarItem(
+                icon: Icon(Icons.person_2_outlined), label: 'Profile'),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 const Color mainColor = Color(0xFFB1B2FF);
 void main() async {
@@ -48,7 +229,7 @@ class MyApp extends StatelessWidget {
           }
 
           if (snapshot.hasData) {
-            return const HomeScreen(); //  User is logged in
+            return const MainScreen(); //  User is logged in
           } else {
             return const OnboardingScreen(); //  User is NOT logged in
           }
@@ -102,7 +283,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _nextPage() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const EmailScreen()),
+      MaterialPageRoute(builder: (context) => const MainScreen()),
     );
   }
 

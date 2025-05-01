@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:swe463project/services/auth_service.dart';
 
+import 'Signup.dart';
 import 'main.dart';
 import 'package:flutter/material.dart';
 
@@ -11,126 +12,6 @@ import 'PaletteCreation.dart';
 import 'Popular.dart';
 import 'Profile.dart'; // lor
 
-class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
-
-  @override
-  State<MainScreen> createState() => _MainScreenState();
-}
-
-class _MainScreenState extends State<MainScreen> {
-  int _selectedIndex = 0;
-
-  final List<Widget> _pages = const [
-    HomeScreen(),
-    PopularPage(),
-    HomeScreen(),
-    FavoritePage(),
-    ProfilePage(),
-  ];
-
-  void _onItemTapped(int index) {
-    // We disable changing the selected tab when tapping index 2 (Add button)
-    if (index == 2) return;
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _pages,
-      ),
-      bottomNavigationBar: Theme(
-        data: Theme.of(context).copyWith(
-          splashFactory: NoSplash.splashFactory,
-          splashColor: Colors.transparent,
-          highlightColor: Colors.transparent,
-        ),
-        child: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.white,
-          selectedItemColor: mainColor,
-          unselectedItemColor: Colors.grey,
-          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
-          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal),
-          elevation: 10,
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
-          items: [
-            BottomNavigationBarItem(
-                icon: Icon(Icons.home_outlined), label: 'Home'),
-            const BottomNavigationBarItem(
-                icon: Icon(Icons.whatshot_outlined), label: 'Popular'),
-            // BottomNavigationBarItem(
-            //   // Custom styling for the "Add" button.
-            //   icon: Container(
-            //     width: 79,
-            //     height: 45,
-            //     decoration: BoxDecoration(
-            //       color: const Color(0xffAAC4FF),
-            //       borderRadius: BorderRadius.circular(15),
-            //       boxShadow: [
-            //         BoxShadow(
-            //             color: Colors.black.withOpacity(0.4),
-            //             blurRadius: 4,
-            //             offset: Offset(0, 4))
-            //       ],
-            //     ),
-            //     child: GestureDetector(
-            //       onTap: () {
-            //         showModalBottomSheet(
-            //           context: context,
-            //           isScrollControlled: true,
-            //           backgroundColor: Colors
-            //               .transparent, // Let custom container show its round corners
-            //           builder: (BuildContext context) {
-            //             return DraggableScrollableSheet(
-            //               initialChildSize: 0.86,
-            //               minChildSize: 0.5,
-            //               maxChildSize: 1.0,
-            //               builder: (BuildContext context,
-            //                   ScrollController scrollController) {
-            //                 return Container(
-            //                   decoration: const BoxDecoration(
-            //                     color: Colors.white,
-            //                     borderRadius: BorderRadius.vertical(
-            //                         top: Radius.circular(20)),
-            //                   ),
-            //                   child: CreatePaletteModal(),
-            //                 );
-            //               },
-            //             );
-            //           },
-            //         );
-            //       },
-            //       child: Column(
-            //         mainAxisAlignment: MainAxisAlignment.center,
-            //         children: const [
-            //           Icon(Icons.add, color: Colors.black),
-            //           // Text(
-            //           //   'Add',
-            //           //   style: TextStyle(color: Colors.black, fontSize: 10),
-            //           // ),
-            //         ],
-            //       ),
-            //     ),
-            //   ),
-            //   label: '',
-            // ),
-            const BottomNavigationBarItem(
-                icon: Icon(Icons.favorite_outline), label: 'Favorite'),
-            const BottomNavigationBarItem(
-                icon: Icon(Icons.person_2_outlined), label: 'Profile'),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -149,7 +30,7 @@ class _LoginPageState extends State<LoginPage> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const SizedBox(height: 140),
+          const SizedBox(height: 70),
           Image.asset(
             'assets/images/logo.png',
             height: 160,
@@ -256,7 +137,45 @@ class _LoginPageState extends State<LoginPage> {
                           TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
                     ),
                   ),
-                )
+
+                ),
+                TextButton(
+                  style: TextButton.styleFrom(
+                    foregroundColor: const Color(0xFFAAC4FF),
+                    padding: EdgeInsets.all(15),
+                    minimumSize: const Size(0, 0),
+                    tapTargetSize: MaterialTapTargetSize
+                        .shrinkWrap, // Shrink wrap the tap target
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors
+                          .transparent, // Let custom container show its round corners
+                      builder: (BuildContext context) {
+                        return DraggableScrollableSheet(
+                          initialChildSize: 0.86,
+                          minChildSize: 0.5,
+                          maxChildSize: 1.0,
+                          builder: (BuildContext context,
+                              ScrollController scrollController) {
+                            return Container(
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(20)),
+                              ),
+                              child: SignupPage(),
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
+                  child: const Text("don't have an account?"),
+                ),
               ],
             )),
           )

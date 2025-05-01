@@ -86,6 +86,7 @@ class _HomeScreenState extends State<FavoritePage> {
 
   void showEssentialColorFilterSheet() {
     showModalBottomSheet(
+      backgroundColor: Colors.white,
       context: context,
       isScrollControlled: true,
       builder: (context) => Padding(
@@ -221,6 +222,7 @@ class _HomeScreenState extends State<FavoritePage> {
 
   void showSortOptions() {
     showModalBottomSheet(
+      backgroundColor: Colors.white,
       context: context,
       builder: (context) => Padding(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 44),

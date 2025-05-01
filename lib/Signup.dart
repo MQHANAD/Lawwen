@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:swe463project/services/auth_service.dart';
 
+import 'Login.dart';
 import 'main.dart';
 
 class SignupPage extends StatefulWidget {
@@ -21,7 +22,7 @@ class _SignupPageState extends State<SignupPage> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const SizedBox(height: 140),
+          const SizedBox(height: 70),
           Image.asset(
             'assets/images/logo.png',
             height: 160,
@@ -137,7 +138,44 @@ class _SignupPageState extends State<SignupPage> {
                           TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
                     ),
                   ),
-                )
+                ),
+                TextButton(
+                  style: TextButton.styleFrom(
+                    foregroundColor: const Color(0xFFAAC4FF),
+                    padding: EdgeInsets.all(15),
+                    minimumSize: const Size(0, 0),
+                    tapTargetSize: MaterialTapTargetSize
+                        .shrinkWrap, // Shrink wrap the tap target
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors
+                          .transparent, // Let custom container show its round corners
+                      builder: (BuildContext context) {
+                        return DraggableScrollableSheet(
+                          initialChildSize: 0.86,
+                          minChildSize: 0.5,
+                          maxChildSize: 1.0,
+                          builder: (BuildContext context,
+                              ScrollController scrollController) {
+                            return Container(
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(20)),
+                              ),
+                              child: LoginPage(),
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
+                  child: const Text('Sign in with Username and Password'),
+                ),
               ],
             )),
           )
