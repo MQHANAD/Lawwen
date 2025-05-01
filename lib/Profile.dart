@@ -87,6 +87,7 @@ class _ProfileScreenState extends State<ProfilePage>
       endDrawer: SlideTransition(
         position: _drawerSlide,
         child: Drawer(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero),
           backgroundColor: Colors.white.withOpacity(0.95),
           child: SafeArea(
             child: Column(
