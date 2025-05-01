@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../models/palette_model.dart';
+
 /// Saves a 4-color palette under the current user.
 /// [colors]  – list of 4 hex strings WITHOUT the leading “#”.
 /// [title]   – optional palette name.
@@ -20,4 +22,32 @@ Future<void> savePaletteToFirestore({
     'likes': 0,
     'likedBy': <String>[],
   });
+}
+
+Stream<List<PaletteModel>> streamAllPalettes() {
+  return FirebaseFirestore.instance
+      .collection('palettes')
+      .orderBy('createdAt', descending: true)
+      .snapshots()
+      .map((query) => query.docs.map(_docToPalette).toList());
+}
+
+Stream<List<PaletteModel>> streamUserPalettes(String uid) {
+  return FirebaseFirestore.instance
+      .collection('palettes')
+      .where('createdBy', isEqualTo: uid)
+      .orderBy('createdAt', descending: true)
+      .snapshots()
+      .map((query) => query.docs.map(_docToPalette).toList());
+}
+
+PaletteModel _docToPalette(QueryDocumentSnapshot<Map<String, dynamic>> doc) {
+  final d = doc.data();
+  return PaletteModel(
+    id: doc.id,
+    colorHexCodes: List<String>.from(d['colors']),
+    likes: d['likes'] ?? 0,
+    createdAt: (d['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+    // add createdBy if your model has it
+  );
 }
