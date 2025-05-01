@@ -1,29 +1,23 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+/// Saves a 4-color palette under the current user.
+/// [colors]  – list of 4 hex strings WITHOUT the leading “#”.
+/// [title]   – optional palette name.
+/// [category]– optional category tag.
 Future<void> savePaletteToFirestore({
-  required String title,
   required List<String> colors,
-  required String category,
+  String? title,
+  String? category,
 }) async {
   final user = FirebaseAuth.instance.currentUser;
-  if (user == null) {
-    print("User not logged in");
-    return;
-  }
+  if (user == null) throw Exception('User not logged in');
 
   await FirebaseFirestore.instance.collection('palettes').add({
-    'title': title,
-    'colors': colors,
-    'category': category,
+    'colors': colors, // e.g. ["F72585", "7209B7", …]
     'createdBy': user.uid,
-    'createdAt': Timestamp.now(),
+    'createdAt': FieldValue.serverTimestamp(),
+    'likes': 0,
+    'likedBy': <String>[],
   });
 }
-//Example Getter:
-//
-// await savePaletteToFirestore(
-// title: 'Cool Summer',
-// colors: ['#FF0000', '#00FF00', '#0000FF'],
-// category: 'Nature',
-// );

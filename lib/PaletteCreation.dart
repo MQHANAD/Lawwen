@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:swe463project/services/firestore_service.dart';
 
 /// Advanced Color Picker Dialog
 /// This dialog allows a user to select any color via a continuous picker and
@@ -99,8 +99,7 @@ Future<Color?> showAdvancedColorPickerDialog(
 class CreatePaletteModal extends StatefulWidget {
   /// The scrollController provided by DraggableScrollableSheet.
 
-  const CreatePaletteModal({Key? key})
-      : super(key: key);
+  const CreatePaletteModal({Key? key}) : super(key: key);
 
   @override
   State<CreatePaletteModal> createState() => _CreatePaletteModalState();
@@ -131,7 +130,7 @@ class _CreatePaletteModalState extends State<CreatePaletteModal> {
   }
 
   /// Submits the palette; if any slot is unassigned, shows an error.
-  void _submitPalette() {
+  Future<void> _submitPalette() async {
     if (!_allColorsChosen) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -147,8 +146,17 @@ class _CreatePaletteModalState extends State<CreatePaletteModal> {
       // Skip alpha channel if desired:
       return '#${value.substring(2).toUpperCase()}';
     }).toList();
-    print('Created palette: $colorStrings');
-    Navigator.of(context).pop(); // Close the modal.
+    try {
+      await savePaletteToFirestore(colors: colorStrings);
+      Navigator.of(context).pop(); // close the modal
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Palette uploaded')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Upload failed: $e')),
+      );
+    }
   }
 
   @override
@@ -238,7 +246,6 @@ class _CreatePaletteModalState extends State<CreatePaletteModal> {
                                     color: const Color(0xFF484848).withOpacity(
                                         0.2), // 20% transparent background
                                     borderRadius: BorderRadius.circular(6),
-
                                   ),
                                   child: Text(
                                     hexString,
