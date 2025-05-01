@@ -38,7 +38,16 @@ Stream<List<PaletteModel>> streamUserPalettes(String uid) {
       .where('createdBy', isEqualTo: uid)
       .orderBy('createdAt', descending: true)
       .snapshots()
-      .map((query) => query.docs.map(_docToPalette).toList());
+      .map((qs) => qs.docs.map((d) {
+            final data = d.data() as Map<String, dynamic>;
+            return PaletteModel(
+              id: d.id,
+              colorHexCodes: List<String>.from(data['colors']),
+              likes: data['likes'] ?? 0,
+              createdAt:
+                  (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+            );
+          }).toList());
 }
 
 PaletteModel _docToPalette(QueryDocumentSnapshot<Map<String, dynamic>> doc) {

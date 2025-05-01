@@ -1,7 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart'; // for currentUser.uid
 import 'package:flutter/material.dart';
+import 'package:swe463project/services/firestore_service.dart';
+
 import 'models/palette_model.dart';
-import 'widgets/palette_card.dart';
 import 'services/auth_service.dart';
+import 'widgets/palette_card.dart';
 
 /// Displays a user profile with a list of "My Colors" palettes and a right-side slide-out drawer.
 class ProfilePage extends StatefulWidget {
@@ -14,39 +17,17 @@ class ProfilePage extends StatefulWidget {
 class _ProfileScreenState extends State<ProfilePage>
     with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
-  // Example data for "My Colors"
-  final List<PaletteModel> myPalettes = [
-    PaletteModel(
-      id: "1",
-      colorHexCodes: ["a1c5ff", "b8d0ff", "d2dfff", "e9f2ff"],
-      likes: 32618,
-      createdAt: DateTime.now().subtract(const Duration(days: 2555)),
-    ),
-    PaletteModel(
-      id: "2",
-      colorHexCodes: ["2b2d42", "8d99ae", "edf2f4", "ef233c"],
-      likes: 892,
-      createdAt: DateTime.now().subtract(const Duration(days: 10)),
-    ),
-    PaletteModel(
-      id: "3",
-      colorHexCodes: ["f72585", "7209b7", "3a0ca3", "4361ee"],
-      likes: 22312,
-      createdAt: DateTime.now().subtract(const Duration(days: 1000)),
-    ),
-  ];
-
+  List<PaletteModel> _allMyPalettes = [];
   late final AnimationController _drawerAnimationController;
   late final Animation<Offset> _drawerSlide;
 
   @override
   void initState() {
     super.initState();
-    _drawerAnimationController =
-        AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
+    _drawerAnimationController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 300));
     _drawerSlide = Tween<Offset>(
-      begin: const Offset(1, 0),  // slide in from right
+      begin: const Offset(1, 0), // slide in from right
       end: Offset.zero,
     ).animate(CurvedAnimation(
       parent: _drawerAnimationController,
@@ -81,6 +62,13 @@ class _ProfileScreenState extends State<ProfilePage>
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    //    show a loading spinner instead of building the page and crashing
+    if (user == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
     return Scaffold(
       key: _scaffoldKey,
       endDrawerEnableOpenDragGesture: true,
@@ -94,7 +82,6 @@ class _ProfileScreenState extends State<ProfilePage>
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 DrawerHeader(
-
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: const [
@@ -137,7 +124,8 @@ class _ProfileScreenState extends State<ProfilePage>
                     icon: const Icon(Icons.logout, color: Colors.red),
                     label: const Text('Sign Out'),
                     style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.red, backgroundColor: Colors.grey.withOpacity(0.15),
+                      foregroundColor: Colors.red,
+                      backgroundColor: Colors.grey.withOpacity(0.15),
                       elevation: 0,
                       shadowColor: Colors.transparent,
                       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -146,6 +134,7 @@ class _ProfileScreenState extends State<ProfilePage>
                       ),
                     ),
                     onPressed: () async {
+                      print(FirebaseAuth.instance.currentUser?.uid);
                       AuthService().signout(context: context);
                       // Navigate to login or landing page
                     },
@@ -183,7 +172,7 @@ class _ProfileScreenState extends State<ProfilePage>
                   ),
                   IconButton(
                     icon: const Icon(Icons.menu),
-                    onPressed: _openEndDrawer,  // open right-side drawer
+                    onPressed: _openEndDrawer, // open right-side drawer
                   ),
                 ],
               ),
@@ -253,34 +242,50 @@ class _ProfileScreenState extends State<ProfilePage>
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            'My Colors',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.grey[800],
-                            ),
+                        Text(
+                          'My Colors',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey[800],
                           ),
                         ),
                         const SizedBox(height: 12),
+
+                        // ---------- LIVE GRID -----------------------------
                         Expanded(
-                          child: GridView.builder(
-                            itemCount: myPalettes.length,
-                            gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              mainAxisSpacing: 16,
-                              crossAxisSpacing: 16,
-                              childAspectRatio: 0.7,
-                            ),
-                            itemBuilder: (context, index) {
-                              return PaletteCard(
-                                palette: myPalettes[index],
-                                timeAgoText:
-                                timeAgo(myPalettes[index].createdAt),
+                          child: StreamBuilder<List<PaletteModel>>(
+                            stream: streamUserPalettes(user.uid),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasError) {
+                                return Center(
+                                    child: Text('⚠️ ${snapshot.error}'));
+                              }
+                              if (!snapshot.hasData) {
+                                return const Center(
+                                    child: CircularProgressIndicator());
+                              }
+
+                              final myPalettes = snapshot.data!;
+
+                              return GridView.builder(
+                                itemCount: myPalettes.length,
+                                gridDelegate:
+                                    const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  mainAxisSpacing: 16,
+                                  crossAxisSpacing: 16,
+                                  childAspectRatio: 0.7,
+                                ),
+                                itemBuilder: (context, index) {
+                                  final palette = myPalettes[index];
+                                  return PaletteCard(
+                                    palette: palette,
+                                    timeAgoText: timeAgo(palette.createdAt),
+                                  );
+                                },
                               );
                             },
                           ),
