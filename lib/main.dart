@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:swe463project/Login.dart';
+
 import 'Favorite.dart';
 import 'Home.dart';
 import 'PaletteCreation.dart';
@@ -80,7 +81,7 @@ class _MainScreenState extends State<MainScreen> {
         ),
         child: Padding(
           padding: const EdgeInsets.only(bottom: 16),
-          child:ClipRect(
+          child: ClipRect(
             child: BottomNavigationBar(
               type: BottomNavigationBarType.fixed,
               backgroundColor: Colors.white,
@@ -187,8 +188,8 @@ class _MainScreenState extends State<MainScreen> {
               ],
             ),
           ),
-          ),
         ),
+      ),
     );
   }
 }

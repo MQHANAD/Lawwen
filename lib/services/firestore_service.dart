@@ -61,5 +61,39 @@ PaletteModel _docToPalette(QueryDocumentSnapshot<Map<String, dynamic>> doc) {
   );
 }
 
+// deleting user palettes
 Future<void> deletePalette(String paletteId) =>
     FirebaseFirestore.instance.collection('palettes').doc(paletteId).delete();
+
+// like mechanic
+Future<int> toggleLike(String paletteId) async {
+  final uid = FirebaseAuth.instance.currentUser!.uid;
+  final docRef =
+      FirebaseFirestore.instance.collection('palettes').doc(paletteId);
+
+  return FirebaseFirestore.instance.runTransaction<int>((tx) async {
+    final snap = await tx.get(docRef);
+    if (!snap.exists) throw Exception('Palette not found');
+
+    final data = snap.data() as Map<String, dynamic>;
+    final List likedBy = List.from(data['likedBy'] ?? []);
+    int likes = (data['likes'] ?? 0) as int;
+
+    final alreadyLiked = likedBy.contains(uid);
+
+    if (alreadyLiked) {
+      likedBy.remove(uid);
+      likes--;
+    } else {
+      likedBy.add(uid);
+      likes++;
+    }
+
+    tx.update(docRef, {
+      'likedBy': likedBy,
+      'likes': likes,
+    });
+
+    return likes; // value returned from the transaction
+  });
+}
