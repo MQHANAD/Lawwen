@@ -24,13 +24,31 @@ Future<void> savePaletteToFirestore({
   });
 }
 
-Stream<List<PaletteModel>> streamAllPalettes() {
-  return FirebaseFirestore.instance
+Future<List<PaletteModel>> fetchPalettes({DocumentSnapshot? startAfterDoc, int limit = 6}) async {
+  Query query = FirebaseFirestore.instance
       .collection('palettes')
       .orderBy('createdAt', descending: true)
-      .snapshots()
-      .map((query) => query.docs.map(_docToPalette).toList());
+      .limit(limit);
+
+  if (startAfterDoc != null) {
+    query = query.startAfterDocument(startAfterDoc);
+  }
+
+  final querySnapshot = await query.get();
+  print('Fetched docs: ${querySnapshot.docs.length}');
+
+  for (var doc in querySnapshot.docs) {
+    print(doc.data());
+  }
+
+  return querySnapshot.docs.map((doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    return PaletteModel.fromMap(data, doc.id);
+  }).toList();
 }
+
+
+
 
 Stream<List<PaletteModel>> streamUserPalettes(String uid) {
   return FirebaseFirestore.instance
