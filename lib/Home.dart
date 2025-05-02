@@ -237,7 +237,79 @@ class _HomeScreenState extends State<HomeScreen> {
             }
             return Column(
               children: [
-                // ---------- top logo etc. unchanged ----------
+                // Top Logo
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Center(
+                    child: Image.asset('assets/images/logo.png', height: 40),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+                // Sort and Filter Options
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 0, 0, 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      GestureDetector(
+                        onTap: () => showSortOptions(),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.import_export_outlined,
+                                size: 28, color: Colors.black54),
+                            const SizedBox(width: 8),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: const [
+                                Text(
+                                  'Sort',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                      color: Color(0xff414141)),
+                                ),
+                                Text(
+                                  'Sorted by',
+                                  style: TextStyle(
+                                      fontSize: 12, color: Color(0xff4B5563)),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => showEssentialColorFilterSheet(),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.color_lens_outlined,
+                                size: 28, color: Colors.black54),
+                            const SizedBox(width: 8),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: const [
+                                Text(
+                                  'Filters',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                      color: Color(0xff414141)),
+                                ),
+                                Text(
+                                  'Custom',
+                                  style: TextStyle(
+                                      fontSize: 12, color: Color(0xff4B5563)),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Palettes Grid View
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 0.5),
