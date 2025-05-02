@@ -60,3 +60,6 @@ PaletteModel _docToPalette(QueryDocumentSnapshot<Map<String, dynamic>> doc) {
     // add createdBy if your model has it
   );
 }
+
+Future<void> deletePalette(String paletteId) =>
+    FirebaseFirestore.instance.collection('palettes').doc(paletteId).delete();
