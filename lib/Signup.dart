@@ -14,6 +14,7 @@ class SignupPage extends StatefulWidget {
 class _SignupPageState extends State<SignupPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final TextEditingController nameController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -111,6 +112,40 @@ class _SignupPageState extends State<SignupPage> {
                   height: 30,
                 ),
                 Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  child: TextFormField(
+                    controller: nameController,
+                    keyboardType: TextInputType.visiblePassword,
+                    decoration: InputDecoration(
+                      hintText: 'Full Name',
+                      filled: true,
+                      fillColor: Colors.grey.shade100,
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 18),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                            color: mainColor.withOpacity(0.4), width: 2),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: mainColor, width: 2),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      hintStyle: const TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 16,
+                      ),
+                    ),
+                    onChanged: (String value) {},
+                    validator: (value) {
+                      return value!.isEmpty ? 'Please enter Your Name' : null;
+                    },
+                  ),
+                ),
+                SizedBox(
+                  height: 30,
+                ),
+                Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   child: ElevatedButton(
@@ -118,6 +153,7 @@ class _SignupPageState extends State<SignupPage> {
                       await AuthService().signup(
                           email: emailController.text,
                           password: passwordController.text,
+                          name: nameController.text,
                           context: context);
                     },
                     style: ElevatedButton.styleFrom(

@@ -1,12 +1,11 @@
-import 'package:firebase_auth/firebase_auth.dart'; // for currentUser.uid
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:swe463project/services/firestore_service.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:swe463project/main.dart';
 import 'models/palette_model.dart';
 import 'services/auth_service.dart';
 import 'widgets/palette_card.dart';
 
-/// Displays a user profile with a list of "My Colors" palettes and a right-side slide-out drawer.
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
 
@@ -17,28 +16,129 @@ class ProfilePage extends StatefulWidget {
 class _ProfileScreenState extends State<ProfilePage>
     with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  List<PaletteModel> _allMyPalettes = [];
   late final AnimationController _drawerAnimationController;
   late final Animation<Offset> _drawerSlide;
+
+  List<PaletteModel> myPalettes = [];
+  DocumentSnapshot? lastDoc;
+  bool isLoading = false;
+  bool hasMore = true;
+  bool isUserReady = false;
+  final int pageSize = 6;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _drawerAnimationController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 300));
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
     _drawerSlide = Tween<Offset>(
-      begin: const Offset(1, 0), // slide in from right
+      begin: const Offset(1, 0),
       end: Offset.zero,
     ).animate(CurvedAnimation(
       parent: _drawerAnimationController,
       curve: Curves.easeInOut,
     ));
+
+    _waitForUserAndLoad();
+
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 200 &&
+          !isLoading &&
+          hasMore) {
+        _loadMorePalettes();
+      }
+    });
   }
 
-  @override
-  void dispose() {
-    _drawerAnimationController.dispose();
-    super.dispose();
+  Future<void> _waitForUserAndLoad() async {
+    await Future.delayed(Duration(milliseconds: 500));
+    if (mounted && FirebaseAuth.instance.currentUser != null) {
+      setState(() => isUserReady = true);
+      _loadInitialPalettes();
+    }
+  }
+
+  Future<void> _loadInitialPalettes() async {
+    setState(() => isLoading = true);
+    final query = FirebaseFirestore.instance
+        .collection('palettes')
+        .where('createdBy', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+        .orderBy('createdAt', descending: true)
+        .limit(pageSize);
+
+    final snapshot = await query.get();
+    final docs = snapshot.docs;
+
+    setState(() {
+      myPalettes = docs.map((d) {
+        final data = d.data();
+        return PaletteModel(
+            id: d.id,
+            colorHexCodes: List<String>.from(data['colors']),
+            likes: data['likes'] ?? 0,
+            createdAt:
+            (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+            createdBy: (data['createdBy'] as String?)?.toString() ?? "Lawwen",
+            userName: (data['userName'] as String?)?.toString() ?? "Lawwen",
+            hues: (data['hues'] as List<dynamic>).map((e) => (e as num).toDouble()).toList(),
+
+        );
+      }).toList();
+
+      lastDoc = docs.isNotEmpty ? docs.last : null;
+      hasMore = docs.length == pageSize;
+      isLoading = false;
+    });
+  }
+
+  Future<void> _loadMorePalettes() async {
+    if (!hasMore || isLoading || lastDoc == null) return;
+    setState(() => isLoading = true);
+
+    final query = FirebaseFirestore.instance
+        .collection('palettes')
+        .where('createdBy', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+        .orderBy('createdAt', descending: true)
+        .startAfterDocument(lastDoc!)
+        .limit(pageSize);
+
+    final snapshot = await query.get();
+    final docs = snapshot.docs;
+
+    final morePalettes = docs.map((d) {
+      final data = d.data();
+      return PaletteModel(
+        id: d.id,
+        colorHexCodes: List<String>.from(data['colors']),
+        likes: data['likes'] ?? 0,
+        createdAt:
+        (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+        createdBy: (data['createdBy'] as String?)?.toString() ?? "Lawwen",
+        userName: (data['userName'] as String?)?.toString() ?? "Lawwen",
+        hues: (data['hues'] as List<dynamic>).map((e) => (e as num).toDouble()).toList(),
+
+      );
+    }).toList();
+
+    setState(() {
+      myPalettes.addAll(morePalettes);
+      lastDoc = docs.isNotEmpty ? docs.last : lastDoc;
+      hasMore = docs.length == pageSize;
+      isLoading = false;
+    });
+  }
+
+  Future<void> _refreshPalettes() async {
+    setState(() {
+      myPalettes.clear();
+      lastDoc = null;
+      hasMore = true;
+    });
+    await _loadInitialPalettes();
   }
 
   String timeAgo(DateTime date) {
@@ -61,14 +161,21 @@ class _ProfileScreenState extends State<ProfilePage>
   }
 
   @override
+  void dispose() {
+    _drawerAnimationController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
-    //    show a loading spinner instead of building the page and crashing
-    if (user == null) {
+    if (!isUserReady || user == null) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
     }
+
     return Scaffold(
       key: _scaffoldKey,
       endDrawerEnableOpenDragGesture: true,
@@ -84,21 +191,15 @@ class _ProfileScreenState extends State<ProfilePage>
                 DrawerHeader(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      CircleAvatar(
+                    children: [
+                      const CircleAvatar(
                         radius: 30,
                         backgroundColor: Colors.black54,
                         child: Icon(Icons.person, size: 40, color: Colors.grey),
                       ),
-                      SizedBox(height: 12),
-                      Text(
-                        'Muhannad Alduraywish',
-                        style: TextStyle(color: Colors.black, fontSize: 18),
-                      ),
-                      Text(
-                        'ExampleUsername',
-                        style: TextStyle(color: Colors.grey),
-                      ),
+                      const SizedBox(height: 12),
+                      Text(user.displayName ?? '', style: const TextStyle(fontSize: 18)),
+                      Text(user.email ?? '', style: const TextStyle(color: Colors.grey)),
                     ],
                   ),
                 ),
@@ -133,11 +234,7 @@ class _ProfileScreenState extends State<ProfilePage>
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    onPressed: () async {
-                      print(FirebaseAuth.instance.currentUser?.uid);
-                      AuthService().signout(context: context);
-                      // Navigate to login or landing page
-                    },
+                    onPressed: () => AuthService().signout(context: context),
                   ),
                 ),
               ],
@@ -148,7 +245,6 @@ class _ProfileScreenState extends State<ProfilePage>
       body: SafeArea(
         child: Column(
           children: [
-            // Top Bar
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
               child: Row(
@@ -161,10 +257,7 @@ class _ProfileScreenState extends State<ProfilePage>
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         child: Center(
-                          child: Image.asset(
-                            'assets/images/logo.png',
-                            height: 40,
-                          ),
+                          child: Image.asset('assets/images/logo.png', height: 40),
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -172,55 +265,32 @@ class _ProfileScreenState extends State<ProfilePage>
                   ),
                   IconButton(
                     icon: const Icon(Icons.menu),
-                    onPressed: _openEndDrawer, // open right-side drawer
+                    onPressed: _openEndDrawer,
                   ),
                 ],
               ),
             ),
-
-            // User Info
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Column(
                 children: [
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.grey,
-                    ),
-                    alignment: Alignment.center,
-                    child: const Text(
-                      '100 x 100',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 10, color: Colors.white),
-                    ),
+                  const CircleAvatar(
+                    radius: 30,
+                    backgroundColor: Colors.black54,
+                    child: Icon(Icons.person, size: 40, color: Colors.grey),
                   ),
                   const SizedBox(height: 18),
-                  const Text(
-                    'Muhannad Alduraywish',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  Text(user.displayName ?? '',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      )),
                   const SizedBox(height: 4),
-                  const Text(
-                    'Muhanad@example.com',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                  const SizedBox(height: 2),
-                  const Text(
-                    'ExampleUsername',
-                    style: TextStyle(color: Colors.grey),
-                  ),
+                  Text(user.email ?? '', style: const TextStyle(color: Colors.grey)),
                 ],
               ),
             ),
             const SizedBox(height: 36),
-
-            // Palettes Grid
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 0.5),
@@ -240,56 +310,46 @@ class _ProfileScreenState extends State<ProfilePage>
                     ],
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.fromLTRB(16,16,16,0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'My Colors',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey[800],
+                        Text('My Colors',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey[800],
+                            )),
+                        const SizedBox(height: 12),
+                        Expanded(
+                          child: RefreshIndicator(
+                            displacement: 0,
+                            color: mainColor,
+                            backgroundColor: Colors.transparent,
+                            elevation: 0,
+                            onRefresh: _refreshPalettes,
+                            child: myPalettes.isEmpty && isLoading
+                                ? const Center(child: CircularProgressIndicator(color: mainColor,))
+                                : GridView.builder(
+                              controller: _scrollController,
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              itemCount: myPalettes.length,
+                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                mainAxisSpacing: 16,
+                                crossAxisSpacing: 16,
+                                childAspectRatio: 0.7,
+                              ),
+                              itemBuilder: (context, index) {
+                                final palette = myPalettes[index];
+                                return PaletteCard(
+                                  palette: palette,
+                                  timeAgoText: timeAgo(palette.createdAt),
+                                );
+                              },
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 12),
-
-                        // ---------- LIVE GRID -----------------------------
-                        // Expanded(
-                        //   child: StreamBuilder<List<PaletteModel>>(
-                        //     stream: streamUserPalettes(user.uid),
-                        //     builder: (context, snapshot) {
-                        //       if (snapshot.hasError) {
-                        //         return Center(
-                        //             child: Text('⚠️ ${snapshot.error}'));
-                        //       }
-                        //       if (!snapshot.hasData) {
-                        //         return const Center(
-                        //             child: CircularProgressIndicator());
-                        //       }
-                        //
-                        //       final myPalettes = snapshot.data!;
-                        //
-                        //       return GridView.builder(
-                        //         itemCount: myPalettes.length,
-                        //         gridDelegate:
-                        //             const SliverGridDelegateWithFixedCrossAxisCount(
-                        //           crossAxisCount: 2,
-                        //           mainAxisSpacing: 16,
-                        //           crossAxisSpacing: 16,
-                        //           childAspectRatio: 0.7,
-                        //         ),
-                        //         itemBuilder: (context, index) {
-                        //           final palette = myPalettes[index];
-                        //           return PaletteCard(
-                        //             palette: palette,
-                        //             timeAgoText: timeAgo(palette.createdAt),
-                        //           );
-                        //         },
-                        //       );
-                        //     },
-                        //   ),
-                        // ),
                       ],
                     ),
                   ),

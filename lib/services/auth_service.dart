@@ -5,13 +5,20 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../main.dart';
 
 class AuthService {
-  Future<void> signup(
-      {required String email,
-      required String password,
-      required BuildContext context}) async {
+  Future<void> signup({
+    required String email,
+    required String password,
+    required String name,            // 👈 Add this
+    required BuildContext context,
+  }) async {
     try {
-      await FirebaseAuth.instance
+      final userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
+
+      // 👇 Set display name
+      await userCredential.user?.updateDisplayName(name);
+      await userCredential.user?.reload(); // optional but recommended
+
       await Future.delayed(const Duration(seconds: 1));
       Navigator.of(context).pop();
     } on FirebaseAuthException catch (e) {
@@ -41,8 +48,11 @@ class AuthService {
         backgroundColor: Colors.black87,
         textColor: Colors.white,
       );
-    } catch (e) {}
+    } catch (e) {
+      debugPrint('Signup failed: $e'); // optional logging
+    }
   }
+
 
   Future<void> signIn(
       {required String email,

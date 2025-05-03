@@ -14,13 +14,11 @@ class PopularPage extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<PopularPage> {
-  // Full list of palettes
-
   List<PaletteModel> displayedPalettes = [];
   DocumentSnapshot? lastDocument;
   bool isLoading = false;
   bool hasMore = true;
-  List<PaletteModel> _allPalettes = [];
+  bool isInitialLoad = true;
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -36,31 +34,51 @@ class _HomeScreenState extends State<PopularPage> {
 
   Future<void> _loadInitialPalettes() async {
     if (isLoading) return;
-    setState(() => isLoading = true);
+    setState(() {
+      isLoading = true;
+      isInitialLoad = true;
+    });
 
-    final newPalettes = await fetchPalettes();
-
-    _allPalettes = newPalettes;
-    displayedPalettes = List.from(_allPalettes);
-    hasMore = newPalettes.length == 6;
+    final newPalettes = await fetchPalettes(
+      sortField: 'likes',
+      descending: true,
+      limit: 6,
+    );
 
     if (newPalettes.isNotEmpty) {
       lastDocument = await FirebaseFirestore.instance
           .collection('palettes')
           .doc(newPalettes.last.id)
           .get();
-    }else {
+    } else {
       hasMore = false;
     }
 
-    setState(() => isLoading = false);
+    setState(() {
+      displayedPalettes = newPalettes;
+      hasMore = newPalettes.length == 6;
+      isLoading = false;
+      isInitialLoad = false;
+    });
   }
-
+  Future<void> _refreshPalettes() async {
+    setState(() {
+      displayedPalettes.clear();
+      lastDocument = null;
+      hasMore = true;
+    });
+    await _loadInitialPalettes();
+  }
   Future<void> _loadMorePalettes() async {
     if (!hasMore || isLoading) return;
     setState(() => isLoading = true);
 
-    final snapshots = await fetchPalettes(startAfterDoc: lastDocument);
+    final snapshots = await fetchPalettes(
+      sortField: 'likes',
+      descending: true,
+      startAfterDoc: lastDocument,
+      limit: 6,
+    );
 
     if (snapshots.isNotEmpty) {
       final lastDoc = await FirebaseFirestore.instance
@@ -73,20 +91,12 @@ class _HomeScreenState extends State<PopularPage> {
         lastDocument = lastDoc;
         hasMore = snapshots.length == 6;
       });
-    }else {
+    } else {
       hasMore = false;
     }
 
     setState(() => isLoading = false);
   }
-
-
-
-  Color _hexToColor(String hex) {
-    final sanitized = hex.replaceAll('#', '').trim();
-    return Color(int.parse('FF$sanitized', radix: 16));
-  }
-
 
   String timeAgo(DateTime date) {
     final diff = DateTime.now().difference(date);
@@ -95,30 +105,29 @@ class _HomeScreenState extends State<PopularPage> {
     return '${diff.inDays}d ago';
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
+        child:RefreshIndicator(
+        edgeOffset: -300,
+        onRefresh: _refreshPalettes,          // ★ pull-to-refresh
         child: Column(
           children: [
             if (hasMore && isLoading)
-              Padding(
-                padding: EdgeInsets.all(16),
-                child: Center(
-                  child: CircularProgressIndicator(color: mainColor),
-                ),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Center(child: CircularProgressIndicator()),
               )
             else
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: Center(
-                  child: Image.asset('assets/images/logo.png', height: 40),
-                ),
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: Center(
+                child: Image.asset('assets/images/logo.png', height: 40),
               ),
+            ),
             const SizedBox(height: 20),
-
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 0.5),
@@ -138,7 +147,7 @@ class _HomeScreenState extends State<PopularPage> {
                     ],
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16,16,16,0),
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                     child: Column(
                       children: [
                         Align(
@@ -153,35 +162,24 @@ class _HomeScreenState extends State<PopularPage> {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        if (displayedPalettes.isEmpty && isLoading)
-                          const Center(child: CircularProgressIndicator())
-                        else
                           Expanded(
-                            child: Column(
-                              children: [
-                                Expanded(
-                                  child: GridView.builder(
-                                    controller: _scrollController,
-                                    itemCount: displayedPalettes.length,
-                                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 2,
-                                      mainAxisSpacing: 16,
-                                      crossAxisSpacing: 16,
-                                      childAspectRatio: 0.7,
-                                    ),
-                                    itemBuilder: (context, index) {
-                                      return PaletteCard(
-                                        palette: displayedPalettes[index],
-                                        timeAgoText: timeAgo(displayedPalettes[index].createdAt),
-                                      );
-                                    },
-                                  ),
-                                ),
-
-                              ],
+                            child: GridView.builder(
+                              controller: _scrollController,
+                              itemCount: displayedPalettes.length,
+                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                mainAxisSpacing: 16,
+                                crossAxisSpacing: 16,
+                                childAspectRatio: 0.7,
+                              ),
+                              itemBuilder: (context, index) {
+                                return PaletteCard(
+                                  palette: displayedPalettes[index],
+                                  timeAgoText: timeAgo(displayedPalettes[index].createdAt),
+                                );
+                              },
                             ),
                           ),
-
                       ],
                     ),
                   ),
@@ -189,8 +187,9 @@ class _HomeScreenState extends State<PopularPage> {
               ),
             ),
           ],
-        ),
+        ),),
       ),
     );
   }
 }
+

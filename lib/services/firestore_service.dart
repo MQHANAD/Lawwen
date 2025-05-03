@@ -1,12 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 
 import '../models/palette_model.dart';
 
 /// Saves a 4-color palette under the current user.
-/// [colors]  – list of 4 hex strings WITHOUT the leading “#”.
-/// [title]   – optional palette name.
-/// [category]– optional category tag.
 Future<void> savePaletteToFirestore({
   required List<String> colors,
   String? title,
@@ -15,9 +13,16 @@ Future<void> savePaletteToFirestore({
   final user = FirebaseAuth.instance.currentUser;
   if (user == null) throw Exception('User not logged in');
 
+  final hues = colors.map((hex) {
+    final color = Color(int.parse('FF${hex.replaceAll('#', '')}', radix: 16));
+    return HSLColor.fromColor(color).hue;
+  }).toList();
+
   await FirebaseFirestore.instance.collection('palettes').add({
-    'colors': colors, // e.g. ["F72585", "7209B7", …]
+    'colors': colors,
+    'hues': hues,
     'createdBy': user.uid,
+    'userName': user.displayName,
     'createdAt': FieldValue.serverTimestamp(),
     'likes': 0,
     'likedBy': <String>[],
@@ -34,15 +39,16 @@ Future<List<PaletteModel>> fetchPalettes({
   Query<Map<String, dynamic>> q =
   FirebaseFirestore.instance.collection('palettes');
 
-  // array-contains on the colors array
   if (filterHex != null && filterHex.isNotEmpty) {
-    q = q.where('colors', arrayContains: filterHex);
+    final targetColor = Color(int.parse('FF${filterHex.replaceAll('#', '')}', radix: 16));
+    final hue = HSLColor.fromColor(targetColor).hue.round();
+    final range = List.generate(31, (i) => (hue - 15 + i + 360) % 360);
+    final hueSubset = range.take(10).toList();
+    q = q.where('hues', arrayContainsAny: hueSubset);
   }
 
-  // order + limit
   q = q.orderBy(sortField, descending: descending).limit(limit);
 
-  // pagination cursor
   if (startAfterDoc != null) {
     q = q.startAfterDocument(startAfterDoc);
   }
@@ -53,45 +59,70 @@ Future<List<PaletteModel>> fetchPalettes({
       .toList();
 }
 
-
-Stream<List<PaletteModel>> streamUserPalettes(String uid) {
-  return FirebaseFirestore.instance
+Future<List<PaletteModel>> fetchUserPalettes({
+  required String uid,
+  DocumentSnapshot? startAfter,
+  int limit = 6,
+}) async {
+  Query query = FirebaseFirestore.instance
       .collection('palettes')
       .where('createdBy', isEqualTo: uid)
       .orderBy('createdAt', descending: true)
-      .snapshots()
-      .map((qs) => qs.docs.map((d) {
-            final data = d.data() as Map<String, dynamic>;
-            return PaletteModel(
-              id: d.id,
-              colorHexCodes: List<String>.from(data['colors']),
-              likes: data['likes'] ?? 0,
-              createdAt:
-                  (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-            );
-          }).toList());
+      .limit(limit);
+
+  if (startAfter != null) {
+    query = query.startAfterDocument(startAfter);
+  }
+
+  final snapshot = await query.get();
+  return snapshot.docs.map((doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    return PaletteModel(
+        id: doc.id,
+        colorHexCodes: List<String>.from(data['colors']),
+        likes: data['likes'] ?? 0,
+        createdAt:
+        (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+        createdBy:  (data['createdBy'] as String?)?.toString() ?? "Lawwen",
+        userName: (data['userName'] as String?)?.toString() ?? "Lawwen",
+        hues: (data['hues'] as List<dynamic>).map((e) => (e as num).toDouble()).toList(),
+
+    );
+  }).toList();
 }
 
-PaletteModel _docToPalette(QueryDocumentSnapshot<Map<String, dynamic>> doc) {
-  final d = doc.data();
-  return PaletteModel(
-    id: doc.id,
-    colorHexCodes: List<String>.from(d['colors']),
-    likes: d['likes'] ?? 0,
-    createdAt: (d['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-    // add createdBy if your model has it
-  );
+
+Future<void> updatePalette({
+  required List<String> docID,
+  required List<String> colors,
+  String? title,
+  String? category,
+}) async {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) throw Exception('User not logged in');
+
+  final hues = colors.map((hex) {
+    final color = Color(int.parse('FF${hex.replaceAll('#', '')}', radix: 16));
+    return HSLColor.fromColor(color).hue;
+  }).toList();
+
+  await FirebaseFirestore.instance.collection('palettes').doc(docID.first).update({
+    'colors': colors,
+    'hues': hues,
+    'createdBy': user.uid,
+    'createdAt': FieldValue.serverTimestamp(),
+  });
 }
 
-// deleting user palettes
+
+
 Future<void> deletePalette(String paletteId) =>
     FirebaseFirestore.instance.collection('palettes').doc(paletteId).delete();
 
-// like mechanic
 Future<int> toggleLike(String paletteId) async {
   final uid = FirebaseAuth.instance.currentUser!.uid;
   final docRef =
-      FirebaseFirestore.instance.collection('palettes').doc(paletteId);
+  FirebaseFirestore.instance.collection('palettes').doc(paletteId);
 
   return FirebaseFirestore.instance.runTransaction<int>((tx) async {
     final snap = await tx.get(docRef);
@@ -116,6 +147,6 @@ Future<int> toggleLike(String paletteId) async {
       'likes': likes,
     });
 
-    return likes; // value returned from the transaction
+    return likes;
   });
 }

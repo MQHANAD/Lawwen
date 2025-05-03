@@ -1,5 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // For Clipboard
+import 'package:swe463project/widgets/deleteButton.dart';
 import '../models/palette_model.dart';
 import '../widgets/palette_card.dart';
 import '../widgets/animated_like_button.dart';
@@ -25,38 +27,57 @@ class _PaletteInfoScreenState extends State<PaletteInfoScreen> {
       colorHexCodes: ["c5c9ff", "d2d7ff", "e0e4ff", "EEF1FF"],
       likes: 2,
       createdAt: DateTime.now().subtract(const Duration(hours: 2)),
+      createdBy: "Lawwen",
+      userName: "Lawwen",
+      hues: [233.1, 233.1, 233.1, 233.1],
     ),
     PaletteModel(
       id: "2",
       colorHexCodes: ["212529", "495057", "0dcaf0", "EEEEEE"],
       likes: 10,
       createdAt: DateTime.now().subtract(const Duration(days: 1)),
+      createdBy: "Lawwen",
+      userName: "Lawwen",
+      hues: [210.0, 210.0, 189.8, 0.0],
     ),
     PaletteModel(
       id: "3",
       colorHexCodes: ["f8c8dc", "fdfd96", "9bf6ff", "73C7C7"],
       likes: 5,
       createdAt: DateTime.now().subtract(const Duration(hours: 5)),
+      createdBy: "Lawwen",
+      userName: "Lawwen",
+      hues: [340.0, 60.0, 188.6, 180.0],
     ),
     PaletteModel(
       id: "4",
       colorHexCodes: ["c92a2a", "fa5252", "ffd6a5", "F6DED8"],
       likes: 15000,
       createdAt: DateTime.now().subtract(const Duration(hours: 10)),
+      createdBy: "Lawwen",
+      userName: "Lawwen",
+      hues: [0.0, 0.0, 36.0, 10.3],
     ),
     PaletteModel(
       id: "5",
       colorHexCodes: ["f9ca24", "40739e", "273c75", "00cec9"],
       likes: 8,
       createdAt: DateTime.now().subtract(const Duration(days: 5)),
+      createdBy: "Lawwen",
+      userName: "Lawwen",
+      hues: [47.6, 217.7, 223.6, 182.0],
     ),
     PaletteModel(
       id: "6",
       colorHexCodes: ["00cec9", "2d3436", "ff7675", "00cec9"],
       likes: 3,
       createdAt: DateTime.now().subtract(const Duration(days: 7)),
+      createdBy: "Lawwen",
+      userName: "Lawwen",
+      hues: [182.0, 200.0, 1.1, 182.0],
     ),
   ];
+
 
   /// A list to track which color blocks have been tapped (to show "Copied")
   late List<bool> _copiedList;
@@ -65,8 +86,7 @@ class _PaletteInfoScreenState extends State<PaletteInfoScreen> {
   void initState() {
     super.initState();
     // Initialize the copied status for each color in the main palette.
-    _copiedList =
-    List<bool>.filled(widget.palette.colorHexCodes.length, false);
+    _copiedList = List<bool>.filled(widget.palette.colorHexCodes.length, false);
   }
 
   /// Converts a [DateTime] to a relative string (e.g., "2d ago").
@@ -158,7 +178,8 @@ class _PaletteInfoScreenState extends State<PaletteInfoScreen> {
                     ],
                   ),
                   child: Column(
-                    children: mainPalette.colorHexCodes.asMap().entries.map((entry) {
+                    children:
+                        mainPalette.colorHexCodes.asMap().entries.map((entry) {
                       int index = entry.key;
                       String hex = entry.value;
                       return GestureDetector(
@@ -169,17 +190,18 @@ class _PaletteInfoScreenState extends State<PaletteInfoScreen> {
                               height: 85, // Adjust height as needed
                               decoration: BoxDecoration(
                                 color: _hexToColor(hex),
-                                borderRadius: mainPalette.colorHexCodes.first == hex
+                                borderRadius: mainPalette.colorHexCodes.first ==
+                                        hex
                                     ? const BorderRadius.only(
-                                  topLeft: Radius.circular(24),
-                                  topRight: Radius.circular(24),
-                                )
+                                        topLeft: Radius.circular(24),
+                                        topRight: Radius.circular(24),
+                                      )
                                     : mainPalette.colorHexCodes.last == hex
-                                    ? const BorderRadius.only(
-                                  bottomLeft: Radius.circular(24),
-                                  bottomRight: Radius.circular(24),
-                                )
-                                    : null,
+                                        ? const BorderRadius.only(
+                                            bottomLeft: Radius.circular(24),
+                                            bottomRight: Radius.circular(24),
+                                          )
+                                        : null,
                               ),
                             ),
                             // Positioned text at the bottom left.
@@ -187,11 +209,14 @@ class _PaletteInfoScreenState extends State<PaletteInfoScreen> {
                               bottom: 10,
                               left: 13,
                               child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
                                   // Make the background color 20% transparent; here 0.8 opacity means 20% transparent.
-                                  color: const Color(0xFF484848).withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(8), // Adjust the radius as needed.
+                                  color:
+                                      const Color(0xFF484848).withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(
+                                      8), // Adjust the radius as needed.
                                 ),
                                 child: Text(
                                   _copiedList[index] ? "Copied" : "#$hex",
@@ -210,7 +235,6 @@ class _PaletteInfoScreenState extends State<PaletteInfoScreen> {
                                 ),
                               ),
                             ),
-
                           ],
                         ),
                       );
@@ -226,7 +250,7 @@ class _PaletteInfoScreenState extends State<PaletteInfoScreen> {
                 child: Row(
                   children: [
                     Text(
-                      'Created By Muhannad',
+                      'Created By ' + mainPalette.userName,
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.black87,
@@ -237,17 +261,27 @@ class _PaletteInfoScreenState extends State<PaletteInfoScreen> {
                   ],
                 ),
               ),
-
               // Time info (e.g., "2d ago")
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Text(
-                  timeAgo(mainPalette.createdAt),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
+                child: Row(children: [
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(0,0,0,50),
+                    child: Text(
+                      timeAgo(mainPalette.createdAt),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                      ),
+                    ),
                   ),
-                ),
+                  const Spacer(),
+                  if(FirebaseAuth.instance.currentUser!.uid == mainPalette.createdBy)
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(100,0,0,0),
+                      child: DeleteButton(mainPalette: mainPalette),
+                    )
+                  ]),
               ),
               const SizedBox(height: 36),
 
@@ -270,7 +304,7 @@ class _PaletteInfoScreenState extends State<PaletteInfoScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: GridView.builder(
                   physics:
-                  const NeverScrollableScrollPhysics(), // Disable GridView's own scrolling.
+                      const NeverScrollableScrollPhysics(), // Disable GridView's own scrolling.
                   shrinkWrap: true,
                   itemCount: allPalettes.length,
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
