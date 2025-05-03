@@ -4,6 +4,7 @@ import 'package:swe463project/services/firestore_service.dart';
 
 import '../models/palette_model.dart';
 import '../widgets/palette_card.dart';
+import 'main.dart';
 
 class FavoritePage extends StatefulWidget {
   const FavoritePage({super.key});
@@ -258,12 +259,20 @@ class _HomeScreenState extends State<FavoritePage> {
       body: SafeArea(
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: Center(
-                child: Image.asset('assets/images/logo.png', height: 40),
+            if (hasMore && isLoading)
+              Padding(
+                padding: EdgeInsets.all(16),
+                child: Center(
+                  child: CircularProgressIndicator(color: mainColor),
+                ),
+              )
+            else
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Center(
+                  child: Image.asset('assets/images/logo.png', height: 40),
+                ),
               ),
-            ),
             const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.fromLTRB(0, 0, 0, 16),
@@ -324,7 +333,7 @@ class _HomeScreenState extends State<FavoritePage> {
                     ],
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.fromLTRB(16,16,16,0),
                     child: Column(
                       children: [
                         Align(
@@ -363,13 +372,6 @@ class _HomeScreenState extends State<FavoritePage> {
                                     },
                                   ),
                                 ),
-                                if (hasMore && isLoading)
-                                  const Padding(
-                                    padding: EdgeInsets.symmetric(vertical: 16),
-                                    child: Center(
-                                      child: CircularProgressIndicator(),
-                                    ),
-                                  ),
                               ],
                             ),
                           )

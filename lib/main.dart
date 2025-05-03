@@ -79,113 +79,125 @@ class _MainScreenState extends State<MainScreen> {
           splashColor: Colors.transparent,
           highlightColor: Colors.transparent,
         ),
-        child: Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: ClipRect(
-            child: BottomNavigationBar(
-              type: BottomNavigationBarType.fixed,
-              backgroundColor: Colors.white,
-              selectedItemColor: mainColor,
-              unselectedItemColor: Colors.grey,
-              selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
-              unselectedLabelStyle:
-                  const TextStyle(fontWeight: FontWeight.normal),
-              elevation: 10,
-              currentIndex: _selectedIndex,
-              onTap: _onItemTapped,
-              items: [
-                BottomNavigationBarItem(
-                    icon: Icon(Icons.home_outlined), label: 'Home'),
-                const BottomNavigationBarItem(
-                    icon: Icon(Icons.whatshot_outlined), label: 'Popular'),
-                BottomNavigationBarItem(
-                  // Custom styling for the "Add" button.
-                  icon: Container(
-                    width: 79,
-                    height: 45,
-                    decoration: BoxDecoration(
-                      color: const Color(0xffAAC4FF),
-                      borderRadius: BorderRadius.circular(15),
-                      boxShadow: [
-                        BoxShadow(
-                            color: Colors.black.withOpacity(0.4),
-                            blurRadius: 4,
-                            offset: Offset(0, 4))
-                      ],
-                    ),
-                    child: GestureDetector(
-                      onTap: () {
-                        if (_isLoggedIn) {
-                          showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-                            backgroundColor: Colors
-                                .transparent, // Let custom container show its round corners
-                            builder: (BuildContext context) {
-                              return DraggableScrollableSheet(
-                                initialChildSize: 0.86,
-                                minChildSize: 0.5,
-                                maxChildSize: 1.0,
-                                builder: (BuildContext context,
-                                    ScrollController scrollController) {
-                                  return Container(
-                                    decoration: const BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.vertical(
-                                          top: Radius.circular(20)),
-                                    ),
-                                    child: CreatePaletteModal(),
-                                  );
-                                },
-                              );
-                            },
-                          );
-                        } else {
-                          showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-                            backgroundColor: Colors
-                                .transparent, // Let custom container show its round corners
-                            builder: (BuildContext context) {
-                              return DraggableScrollableSheet(
-                                initialChildSize: 0.86,
-                                minChildSize: 0.5,
-                                maxChildSize: 1.0,
-                                builder: (BuildContext context,
-                                    ScrollController scrollController) {
-                                  return Container(
-                                    decoration: const BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.vertical(
-                                          top: Radius.circular(20)),
-                                    ),
-                                    child: LoginPage(),
-                                  );
-                                },
-                              );
-                            },
-                          );
-                        }
-                      },
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Icon(Icons.add, color: Colors.black),
-                          // Text(
-                          //   'Add',
-                          //   style: TextStyle(color: Colors.black, fontSize: 10),
-                          // ),
+        child: Container(
+          decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 10,
+                offset: Offset(0, -1),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.only(top: 0),
+            child: ClipRect(
+              child: BottomNavigationBar(
+                type: BottomNavigationBarType.fixed,
+                backgroundColor: Colors.white,
+                selectedItemColor: mainColor,
+                unselectedItemColor: Colors.grey,
+                selectedLabelStyle:
+                    const TextStyle(fontWeight: FontWeight.bold),
+                unselectedLabelStyle:
+                    const TextStyle(fontWeight: FontWeight.normal),
+                elevation: 10,
+                currentIndex: _selectedIndex,
+                onTap: _onItemTapped,
+                items: [
+                  BottomNavigationBarItem(
+                      icon: Icon(Icons.home_outlined), label: 'Home'),
+                  const BottomNavigationBarItem(
+                      icon: Icon(Icons.whatshot_outlined), label: 'Popular'),
+                  BottomNavigationBarItem(
+                    // Custom styling for the "Add" button.
+                    icon: Container(
+                      width: 79,
+                      height: 45,
+                      decoration: BoxDecoration(
+                        color: const Color(0xffAAC4FF),
+                        borderRadius: BorderRadius.circular(15),
+                        boxShadow: [
+                          BoxShadow(
+                              color: Colors.black.withOpacity(0.4),
+                              blurRadius: 4,
+                              offset: Offset(0, 4))
                         ],
                       ),
+                      child: GestureDetector(
+                        onTap: () {
+                          if (_isLoggedIn) {
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors
+                                  .transparent, // Let custom container show its round corners
+                              builder: (BuildContext context) {
+                                return DraggableScrollableSheet(
+                                  initialChildSize: 0.86,
+                                  minChildSize: 0.5,
+                                  maxChildSize: 1.0,
+                                  builder: (BuildContext context,
+                                      ScrollController scrollController) {
+                                    return Container(
+                                      decoration: const BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.vertical(
+                                            top: Radius.circular(20)),
+                                      ),
+                                      child: CreatePaletteModal(),
+                                    );
+                                  },
+                                );
+                              },
+                            );
+                          } else {
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors
+                                  .transparent, // Let custom container show its round corners
+                              builder: (BuildContext context) {
+                                return DraggableScrollableSheet(
+                                  initialChildSize: 0.86,
+                                  minChildSize: 0.5,
+                                  maxChildSize: 1.0,
+                                  builder: (BuildContext context,
+                                      ScrollController scrollController) {
+                                    return Container(
+                                      decoration: const BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.vertical(
+                                            top: Radius.circular(20)),
+                                      ),
+                                      child: LoginPage(),
+                                    );
+                                  },
+                                );
+                              },
+                            );
+                          }
+                        },
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const [
+                            Icon(Icons.add, color: Colors.black),
+                            // Text(
+                            //   'Add',
+                            //   style: TextStyle(color: Colors.black, fontSize: 10),
+                            // ),
+                          ],
+                        ),
+                      ),
                     ),
+                    label: '',
                   ),
-                  label: '',
-                ),
-                const BottomNavigationBarItem(
-                    icon: Icon(Icons.favorite_outline), label: 'Favorite'),
-                const BottomNavigationBarItem(
-                    icon: Icon(Icons.person_2_outlined), label: 'Profile'),
-              ],
+                  const BottomNavigationBarItem(
+                      icon: Icon(Icons.favorite_outline), label: 'Favorite'),
+                  const BottomNavigationBarItem(
+                      icon: Icon(Icons.person_2_outlined), label: 'Profile'),
+                ],
+              ),
             ),
           ),
         ),

@@ -24,30 +24,34 @@ Future<void> savePaletteToFirestore({
   });
 }
 
-Future<List<PaletteModel>> fetchPalettes({DocumentSnapshot? startAfterDoc, int limit = 6}) async {
-  Query query = FirebaseFirestore.instance
-      .collection('palettes')
-      .orderBy('createdAt', descending: true)
-      .limit(limit);
+Future<List<PaletteModel>> fetchPalettes({
+  String? filterHex,
+  String sortField = 'createdAt',
+  bool descending = true,
+  DocumentSnapshot? startAfterDoc,
+  int limit = 10,
+}) async {
+  Query<Map<String, dynamic>> q =
+  FirebaseFirestore.instance.collection('palettes');
 
+  // array-contains on the colors array
+  if (filterHex != null && filterHex.isNotEmpty) {
+    q = q.where('colors', arrayContains: filterHex);
+  }
+
+  // order + limit
+  q = q.orderBy(sortField, descending: descending).limit(limit);
+
+  // pagination cursor
   if (startAfterDoc != null) {
-    query = query.startAfterDocument(startAfterDoc);
+    q = q.startAfterDocument(startAfterDoc);
   }
 
-  final querySnapshot = await query.get();
-  print('Fetched docs: ${querySnapshot.docs.length}');
-
-  for (var doc in querySnapshot.docs) {
-    print(doc.data());
-  }
-
-  return querySnapshot.docs.map((doc) {
-    final data = doc.data() as Map<String, dynamic>;
-    return PaletteModel.fromMap(data, doc.id);
-  }).toList();
+  final snap = await q.get();
+  return snap.docs
+      .map((d) => PaletteModel.fromMap(d.data(), d.id))
+      .toList();
 }
-
-
 
 
 Stream<List<PaletteModel>> streamUserPalettes(String uid) {

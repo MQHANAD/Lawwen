@@ -4,6 +4,7 @@ import 'package:swe463project/services/firestore_service.dart';
 
 import '../models/palette_model.dart';
 import '../widgets/palette_card.dart';
+import 'main.dart';
 
 class PopularPage extends StatefulWidget {
   const PopularPage({super.key});
@@ -102,12 +103,20 @@ class _HomeScreenState extends State<PopularPage> {
       body: SafeArea(
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: Center(
-                child: Image.asset('assets/images/logo.png', height: 40),
+            if (hasMore && isLoading)
+              Padding(
+                padding: EdgeInsets.all(16),
+                child: Center(
+                  child: CircularProgressIndicator(color: mainColor),
+                ),
+              )
+            else
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Center(
+                  child: Image.asset('assets/images/logo.png', height: 40),
+                ),
               ),
-            ),
             const SizedBox(height: 20),
 
             Expanded(
@@ -129,7 +138,7 @@ class _HomeScreenState extends State<PopularPage> {
                     ],
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.fromLTRB(16,16,16,0),
                     child: Column(
                       children: [
                         Align(
@@ -168,16 +177,11 @@ class _HomeScreenState extends State<PopularPage> {
                                     },
                                   ),
                                 ),
-                                if (hasMore && isLoading)
-                                  const Padding(
-                                    padding: EdgeInsets.symmetric(vertical: 16),
-                                    child: Center(
-                                      child: CircularProgressIndicator(),
-                                    ),
-                                  ),
+
                               ],
                             ),
                           ),
+
                       ],
                     ),
                   ),

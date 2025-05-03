@@ -255,41 +255,41 @@ class _ProfileScreenState extends State<ProfilePage>
                         const SizedBox(height: 12),
 
                         // ---------- LIVE GRID -----------------------------
-                        Expanded(
-                          child: StreamBuilder<List<PaletteModel>>(
-                            stream: streamUserPalettes(user.uid),
-                            builder: (context, snapshot) {
-                              if (snapshot.hasError) {
-                                return Center(
-                                    child: Text('⚠️ ${snapshot.error}'));
-                              }
-                              if (!snapshot.hasData) {
-                                return const Center(
-                                    child: CircularProgressIndicator());
-                              }
-
-                              final myPalettes = snapshot.data!;
-
-                              return GridView.builder(
-                                itemCount: myPalettes.length,
-                                gridDelegate:
-                                    const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                  mainAxisSpacing: 16,
-                                  crossAxisSpacing: 16,
-                                  childAspectRatio: 0.7,
-                                ),
-                                itemBuilder: (context, index) {
-                                  final palette = myPalettes[index];
-                                  return PaletteCard(
-                                    palette: palette,
-                                    timeAgoText: timeAgo(palette.createdAt),
-                                  );
-                                },
-                              );
-                            },
-                          ),
-                        ),
+                        // Expanded(
+                        //   child: StreamBuilder<List<PaletteModel>>(
+                        //     stream: streamUserPalettes(user.uid),
+                        //     builder: (context, snapshot) {
+                        //       if (snapshot.hasError) {
+                        //         return Center(
+                        //             child: Text('⚠️ ${snapshot.error}'));
+                        //       }
+                        //       if (!snapshot.hasData) {
+                        //         return const Center(
+                        //             child: CircularProgressIndicator());
+                        //       }
+                        //
+                        //       final myPalettes = snapshot.data!;
+                        //
+                        //       return GridView.builder(
+                        //         itemCount: myPalettes.length,
+                        //         gridDelegate:
+                        //             const SliverGridDelegateWithFixedCrossAxisCount(
+                        //           crossAxisCount: 2,
+                        //           mainAxisSpacing: 16,
+                        //           crossAxisSpacing: 16,
+                        //           childAspectRatio: 0.7,
+                        //         ),
+                        //         itemBuilder: (context, index) {
+                        //           final palette = myPalettes[index];
+                        //           return PaletteCard(
+                        //             palette: palette,
+                        //             timeAgoText: timeAgo(palette.createdAt),
+                        //           );
+                        //         },
+                        //       );
+                        //     },
+                        //   ),
+                        // ),
                       ],
                     ),
                   ),
