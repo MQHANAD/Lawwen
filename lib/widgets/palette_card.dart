@@ -134,7 +134,12 @@ class _PaletteCardState extends State<PaletteCard> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  AnimatedLikeButton(likes: widget.palette.likes),
+                  AnimatedLikeButton(
+                    isInitiallyLiked: widget.palette.isLiked,   // ✅ correct boolean
+                    initialLikes: widget.palette.likes,         // ✅ correct integer
+                    paletteId: widget.palette.id,
+                  ),
+
                   Text(widget.timeAgoText),
                 ],
               ),

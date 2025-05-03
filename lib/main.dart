@@ -39,7 +39,7 @@ class _MainScreenState extends State<MainScreen> {
         context: context,
         isScrollControlled: true,
         backgroundColor:
-            Colors.transparent, // Let custom container show its round corners
+        Colors.transparent, // Let custom container show its round corners
         builder: (BuildContext context) {
           return DraggableScrollableSheet(
             initialChildSize: 0.86,
@@ -98,9 +98,9 @@ class _MainScreenState extends State<MainScreen> {
                 selectedItemColor: mainColor,
                 unselectedItemColor: Colors.grey,
                 selectedLabelStyle:
-                    const TextStyle(fontWeight: FontWeight.bold),
+                const TextStyle(fontWeight: FontWeight.bold),
                 unselectedLabelStyle:
-                    const TextStyle(fontWeight: FontWeight.normal),
+                const TextStyle(fontWeight: FontWeight.normal),
                 elevation: 10,
                 currentIndex: _selectedIndex,
                 onTap: _onItemTapped,
@@ -270,7 +270,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       'image': 'assets/images/logoGif.gif',
       'title': 'Unleash Your Creativity',
       'subtitle':
-          'Explore handpicked color palettes and create your own masterpiece.',
+      'Explore handpicked color palettes and create your own masterpiece.',
       'height': "400",
       'bottom': "310",
     },
@@ -431,7 +431,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(
                 _onboardingData.length,
-                (index) => _buildIndicator(index),
+                    (index) => _buildIndicator(index),
               ),
             ),
           ),

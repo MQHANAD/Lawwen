@@ -88,7 +88,7 @@ class _ProfileScreenState extends State<ProfilePage>
       createdAt: (d['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       createdBy: d['createdBy'] ?? 'Lawwen',
       userName : d['userName']  ?? 'Lawwen',
-      hues: (d['hues'] as List<dynamic>).map((e) => (e as num).toDouble()).toList(),
+      hues: (d['hues'] as List<dynamic>).map((e) => (e as num).toDouble()).toList(), likedBy: [],
     );
   }
 

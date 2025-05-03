@@ -52,10 +52,10 @@ Future<List<PaletteModel>> fetchPalettes({
   if (startAfterDoc != null) {
     q = q.startAfterDocument(startAfterDoc);
   }
-
+  final user = FirebaseAuth.instance.currentUser;
   final snap = await q.get();
   return snap.docs
-      .map((d) => PaletteModel.fromMap(d.data(), d.id))
+      .map((d) => PaletteModel.fromMap(d.data(), d.id, user?.uid ?? ''))
       .toList();
 }
 
@@ -73,21 +73,10 @@ Future<List<PaletteModel>> fetchUserPalettes({
   if (startAfter != null) {
     query = query.startAfterDocument(startAfter);
   }
-
   final snapshot = await query.get();
   return snapshot.docs.map((doc) {
     final data = doc.data() as Map<String, dynamic>;
-    return PaletteModel(
-        id: doc.id,
-        colorHexCodes: List<String>.from(data['colors']),
-        likes: data['likes'] ?? 0,
-        createdAt:
-        (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-        createdBy:  (data['createdBy'] as String?)?.toString() ?? "Lawwen",
-        userName: (data['userName'] as String?)?.toString() ?? "Lawwen",
-        hues: (data['hues'] as List<dynamic>).map((e) => (e as num).toDouble()).toList(),
-
-    );
+    return PaletteModel.fromMap(data, doc.id,uid);
   }).toList();
 }
 
@@ -119,10 +108,33 @@ Future<void> updatePalette({
 Future<void> deletePalette(String paletteId) =>
     FirebaseFirestore.instance.collection('palettes').doc(paletteId).delete();
 
+Future<List<PaletteModel>> fetchFavoritePalettes({
+  DocumentSnapshot? startAfter,
+  int limit = 10,
+}) async {
+  final uid = FirebaseAuth.instance.currentUser!.uid;
+  final userDoc =
+  await FirebaseFirestore.instance.collection('users').doc(uid).get();
+  final List<dynamic> favoriteIds = userDoc['favorites'] ?? [];
+
+  if (favoriteIds.isEmpty) return [];
+
+  final idBatch = favoriteIds.take(limit).toList(); // Use pagination logic here
+
+  final snapshot = await FirebaseFirestore.instance
+      .collection('palettes')
+      .where(FieldPath.documentId, whereIn: idBatch)
+      .get();
+
+  return snapshot.docs.map((doc) {
+    return PaletteModel.fromMap(doc.data(), doc.id, uid);
+  }).toList();
+}
+
 Future<int> toggleLike(String paletteId) async {
   final uid = FirebaseAuth.instance.currentUser!.uid;
-  final docRef =
-  FirebaseFirestore.instance.collection('palettes').doc(paletteId);
+  final docRef = FirebaseFirestore.instance.collection('palettes').doc(paletteId);
+  final userRef = FirebaseFirestore.instance.collection('users').doc(uid);
 
   return FirebaseFirestore.instance.runTransaction<int>((tx) async {
     final snap = await tx.get(docRef);
@@ -137,9 +149,15 @@ Future<int> toggleLike(String paletteId) async {
     if (alreadyLiked) {
       likedBy.remove(uid);
       likes--;
+      tx.update(userRef, {
+        'favorites': FieldValue.arrayRemove([paletteId]),
+      });
     } else {
       likedBy.add(uid);
       likes++;
+      tx.set(userRef, {
+        'favorites': FieldValue.arrayUnion([paletteId]),
+      }, SetOptions(merge: true));
     }
 
     tx.update(docRef, {

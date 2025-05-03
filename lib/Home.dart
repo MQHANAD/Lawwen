@@ -69,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
       createdBy: d['createdBy'] ?? 'Lawwen',
       userName : d['userName']  ?? 'Lawwen',
       hues: (d['hues'] as List<dynamic>)
-          .map((e) => (e as num).toDouble()).toList(),
+          .map((e) => (e as num).toDouble()).toList(), likedBy: [],
     );
   }
 
@@ -467,4 +467,3 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
-

@@ -29,7 +29,7 @@ class _PaletteInfoScreenState extends State<PaletteInfoScreen> {
       createdAt: DateTime.now().subtract(const Duration(hours: 2)),
       createdBy: "Lawwen",
       userName: "Lawwen",
-      hues: [233.1, 233.1, 233.1, 233.1],
+      hues: [233.1, 233.1, 233.1, 233.1], likedBy: [],
     ),
     PaletteModel(
       id: "2",
@@ -38,7 +38,7 @@ class _PaletteInfoScreenState extends State<PaletteInfoScreen> {
       createdAt: DateTime.now().subtract(const Duration(days: 1)),
       createdBy: "Lawwen",
       userName: "Lawwen",
-      hues: [210.0, 210.0, 189.8, 0.0],
+      hues: [210.0, 210.0, 189.8, 0.0], likedBy: [],
     ),
     PaletteModel(
       id: "3",
@@ -47,7 +47,7 @@ class _PaletteInfoScreenState extends State<PaletteInfoScreen> {
       createdAt: DateTime.now().subtract(const Duration(hours: 5)),
       createdBy: "Lawwen",
       userName: "Lawwen",
-      hues: [340.0, 60.0, 188.6, 180.0],
+      hues: [340.0, 60.0, 188.6, 180.0], likedBy: [],
     ),
     PaletteModel(
       id: "4",
@@ -56,7 +56,7 @@ class _PaletteInfoScreenState extends State<PaletteInfoScreen> {
       createdAt: DateTime.now().subtract(const Duration(hours: 10)),
       createdBy: "Lawwen",
       userName: "Lawwen",
-      hues: [0.0, 0.0, 36.0, 10.3],
+      hues: [0.0, 0.0, 36.0, 10.3], likedBy: [],
     ),
     PaletteModel(
       id: "5",
@@ -65,7 +65,7 @@ class _PaletteInfoScreenState extends State<PaletteInfoScreen> {
       createdAt: DateTime.now().subtract(const Duration(days: 5)),
       createdBy: "Lawwen",
       userName: "Lawwen",
-      hues: [47.6, 217.7, 223.6, 182.0],
+      hues: [47.6, 217.7, 223.6, 182.0], likedBy: [],
     ),
     PaletteModel(
       id: "6",
@@ -74,7 +74,7 @@ class _PaletteInfoScreenState extends State<PaletteInfoScreen> {
       createdAt: DateTime.now().subtract(const Duration(days: 7)),
       createdBy: "Lawwen",
       userName: "Lawwen",
-      hues: [182.0, 200.0, 1.1, 182.0],
+      hues: [182.0, 200.0, 1.1, 182.0], likedBy: [],
     ),
   ];
 
@@ -257,7 +257,12 @@ class _PaletteInfoScreenState extends State<PaletteInfoScreen> {
                       ),
                     ),
                     const Spacer(),
-                    AnimatedLikeButton(likes: mainPalette.likes),
+                    AnimatedLikeButton(
+                      isInitiallyLiked: widget.palette.isLiked,   // ✅ correct boolean
+                      initialLikes: widget.palette.likes,         // ✅ correct integer
+                      paletteId: widget.palette.id,
+                    ),
+
                   ],
                 ),
               ),
