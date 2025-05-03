@@ -276,7 +276,7 @@ class _PaletteInfoScreenState extends State<PaletteInfoScreen> {
                     ),
                   ),
                   const Spacer(),
-                  if(FirebaseAuth.instance.currentUser!.uid == mainPalette.createdBy)
+                  if(FirebaseAuth.instance.currentUser?.uid == mainPalette.createdBy)
                     Padding(
                       padding: EdgeInsets.fromLTRB(100,0,0,0),
                       child: DeleteButton(mainPalette: mainPalette),
