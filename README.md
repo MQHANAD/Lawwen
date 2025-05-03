@@ -1,7 +1,7 @@
 # لون - Color Palette Sharing App
 
 ## Overview
-لون is a mobile application developed using Flutter as part of the SWE463 Mobile Application Development course. It allows users to explore, create, and share color palettes. The app provides an intuitive interface for designers and creatives to discover and save inspiring color combinations.
+لون is a mobile application developed using Flutter as part of the SWE463 Mobile Application Development course. It allows users to explore, create, and share color palettes (+3500 palettes). The app provides an intuitive interface for designers and creatives to discover and save inspiring color combinations.
 
 ## Features
 - **User Authentication**: Sign up and log in using email verification.
@@ -42,10 +42,6 @@
 ## Future Enhancements
 - Implement backend database for storing palettes.
 - Enhance UI with animations.
-- Add social sharing features.
-
-## License
-This project is for educational purposes only.
 
 ## Contact
 For any questions, feel free to reach out to the team members.
